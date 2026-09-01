@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revize pravidel třídění pošty</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #1e293b; --panel2: #273549; --text: #e2e8f0;
+    --muted: #94a3b8; --border: #334155; --amber: #f59e0b; --green: #22c55e;
+    --red: #ef4444; --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 13px; color: var(--muted); }
+  .stat b { color: var(--text); font-size: 16px; display: block; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { background: var(--panel); border: 1px solid var(--border); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+  .tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .rule { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 16px; align-items: flex-start; }
+  .rule.discarded { opacity: 0.55; }
+  .rule.discarded .criterion { text-decoration: line-through; }
+  /* tabulka pravidel (t 2026-08-23) */
+  table.rules { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; font-size: 13px; }
+  table.rules th { text-align: left; padding: 10px 12px; background: var(--panel2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.rules th.sortable { cursor: pointer; user-select: none; }
+  table.rules th.sortable:hover { color: var(--text); }
+  table.rules td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.rules tr:last-child td { border-bottom: none; }
+  table.rules tr.discarded { opacity: 0.5; }
+  table.rules tr.discarded .criterion { text-decoration: line-through; }
+  table.rules tr:hover td { background: rgba(255,255,255,.03); }
+  table.rules .criterion { font-size: 13px; line-height: 1.4; min-width: 260px; }
+  table.rules .criterion .sender { font-weight: 700; }
+  table.rules .criterion .part { color: var(--muted); font-size: 12px; }
+  table.rules .labels { max-width: 220px; }
+  table.rules .actions { white-space: nowrap; text-align: right; }
+  table.rules .actions button { padding: 4px 8px; font-size: 12px; }
+  button.run:hover { background: #052e16; border-color: var(--green); }
+  .muted { color: var(--muted); }
+  .left { flex: 1; min-width: 0; }
+  .right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .criterion { font-size: 15px; line-height: 1.45; word-break: break-word; }
+  .criterion .sender { font-weight: 700; }
+  .criterion .part { color: var(--muted); font-size: 13px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .chip { font-size: 12px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; color: var(--muted); }
+  .chip.folder { color: #dbeafe; border-color: #1d4ed8; background: #172554; font-weight: 600; }
+  .chip.label { color: #fef3c7; border-color: #92400e; background: #451a03; }
+  .meta { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .badge { font-size: 11px; border-radius: 999px; padding: 2px 10px; font-weight: 600; }
+  .badge.pending { background: #451a03; color: var(--amber); }
+  .badge.ok { background: #052e16; color: var(--green); }
+  .badge.discard { background: #450a0a; color: var(--red); }
+  .actions { display: flex; gap: 6px; }
+  button { border: 1px solid var(--border); background: var(--panel2); color: var(--text); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  button.ok:hover { background: #052e16; border-color: var(--green); }
+  button.disc:hover { background: #450a0a; border-color: var(--red); }
+  button.restore:hover { background: #172554; border-color: var(--blue); }
+  .empty { color: var(--muted); text-align: center; padding: 30px; }
+  .refresh { margin-left: auto; }
+  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; font-size: 13px; display: none; }
+  /* login overlay (shared-auth, stejné jako CDprocesy) */
+  #login { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); align-items: center; justify-content: center; z-index: 60; }
+  #login.open { display: flex; }
+  .login-box { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 26px; width: min(380px, 92vw); }
+  .login-box h2 { font-size: 18px; margin-bottom: 4px; }
+  .login-box .sub { margin-bottom: 18px; }
+  .login-box .err { color: var(--red); font-size: 13px; margin-bottom: 10px; min-height: 16px; }
+  .login-box .save { width: 100%; background: var(--green); border-color: var(--green); color: #052e16; font-weight: 700; padding: 10px; margin-top: 4px; }
+  .logout { border-color: var(--red); color: var(--red); }
+  /* modal */
+  #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); align-items: center; justify-content: center; z-index: 50; }
+  #modal.open { display: flex; }
+  .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; width: min(560px, 92vw); max-height: 90vh; overflow: auto; }
+  .modal-box h2 { font-size: 16px; margin-bottom: 14px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .field input { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  .modal-actions .save { background: var(--green); border-color: var(--green); color: #052e16; font-weight: 700; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+  <h1>📬 Revize pravidel třídění pošty (bezouska)</h1>
+  <div class="sub">Kritérium (odesílatel × příjemce × předmět) → složka + labely. „Zahodit“ = pravidlo se přestane používat (soft-delete, jde vrátit).</div>
+
+  <div class="stats" id="stats"></div>
+
+  <div id="login">
+    <div class="login-box">
+      <h2>🔐 MailFilter</h2>
+      <div class="sub">Správa filtrů třídění pošty (bezouska)</div>
+      <div class="field"><label>Uživatel / e-mail</label><input id="l-user" autocomplete="username"></div>
+      <div class="field"><label>Heslo</label><input id="l-pass" type="password" autocomplete="current-password"></div>
+      <div class="err" id="l-error"></div>
+      <button class="save" onclick="doLogin()">Přihlásit</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="list"></div>
+  <div id="toast"></div>
+
+  <div id="modal">
+    <div class="modal-box">
+      <h2 id="modal-title">✏️ Upravit pravidlo</h2>
+      <div class="field"><label>Odesílatel (volitelné — prázdné = libovolný)</label><input id="f-sender" placeholder="info@example.cz"></div>
+      <div class="field"><label>Příjemce (volitelné)</label><input id="f-recipient" placeholder="tomas@bezouska.cz"></div>
+      <div class="field"><label>Předmět obsahuje (volitelné)</label><input id="f-subject" placeholder="Nová datová zpráva pro: …"></div>
+      <div class="field"><label>Přeposlat na (volitelné — po přesunu se email přepošle)</label><input id="f-forward" placeholder="partner@example.cz"></div>
+      <div class="hint" style="margin-bottom:12px;color:var(--muted);font-size:11px;">Stačí vyplnit aspoň jedno kritérium. V odesílateli/příjemci funguje <b>*</b> jako libovolný text — např. <b>*@bezouska.cz</b> chytí celou doménu. (t, 2026-08-24)</div>
+      <div class="field"><label>Složka</label><input id="f-folder" list="folder-list">
+        <datalist id="folder-list"></datalist>
+        <div class="hint">Cílová složka, např. Folders/90_ostatni/91_newsletter</div>
+      </div>
+      <div class="field"><label>Labely (čárkou)</label><input id="f-labels" placeholder="newsletter, vyresit"></div>
+      <div class="modal-actions">
+        <button onclick="closeEdit()">Zrušit</button>
+        <button class="save" onclick="saveEdit()">💾 Uložit</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const state = { rules: [], filter: 'all', sort: { key: 'criterion', dir: 1 }, running: null, _pollTimer: null, _waiting: null, inboxRunning: false, inboxRun: null, _inboxWaiting: null };
+const TOKEN_KEY = 'mailfilter_token';
+let token = localStorage.getItem(TOKEN_KEY) || null;
+
+async function api(url, opts) {
+  const headers = Object.assign({'Content-Type': 'application/json'}, (opts && opts.headers) || {});
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const r = await fetch(url, Object.assign({}, opts, { headers }));
+  if (r.status === 401) { showLogin(); return { ok: false, error: 'Přihlaste se' }; }
+  return r.json();
+}
+
+function showLogin() {
+  token = null;
+  localStorage.removeItem(TOKEN_KEY);
+  document.getElementById('login').classList.add('open');
+  document.getElementById('l-user').focus();
+}
+
+async function doLogin() {
+  const errEl = document.getElementById('l-error');
+  errEl.textContent = '';
+  const r = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      email: document.getElementById('l-user').value.trim(),
+      password: document.getElementById('l-pass').value
+    })
+  });
+  const d = await r.json().catch(() => ({}));
+  if (r.status === 200 && d.token) {
+    token = d.token;
+    localStorage.setItem(TOKEN_KEY, token);
+    document.getElementById('login').classList.remove('open');
+    document.getElementById('l-pass').value = '';
+    load();
+  } else {
+    errEl.textContent = d.detail || 'Neplatné přihlašovací údaje';
+  }
+}
+
+function logout() {
+  showLogin();
+  toast('Odhlášeno');
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderStats() {
+  const s = { total: 0, pending: 0, ok: 0, discard: 0 };
+  for (const r of state.rules) { s.total++; s[r.review_status]++; }
+  const ib = state.inboxRun || {};
+  let inboxBtn = '';
+  if (state.inboxRunning) {
+    inboxBtn = `<button class="refresh" style="border-color:var(--amber);color:var(--amber)" disabled>⏳ Zpracovávám INBOX…</button>`;
+  } else {
+    inboxBtn = `<button class="refresh" style="border-color:var(--blue);color:var(--blue)" onclick="runInboxProcess()">⚡ Zpracovat INBOX</button>`;
+  }
+  let inboxInfo = '';
+  if (ib && ib.status) {
+    const done = ib.status === 'done';
+    const col = done ? 'var(--green)' : 'var(--red)';
+    const sum = ib.summary || {};
+    inboxInfo = `<span class="muted" style="font-size:11px;align-self:center" title="${esc(JSON.stringify(ib.errors || []))}">` +
+      `INBOX: <span style="color:${col}">${done ? '✅ zpracováno' : '⚠️ chyba'}</span>` +
+      (done && sum.processed_count != null ? ` · přesunuto ${sum.processed_count} · kandidátů LLM ${sum.llm_candidate_count} · chyb ${sum.errors_count ?? 0}` : '') +
+      ` · ${esc((ib.finished_at || '').slice(0,16).replace('T',' '))}</span>`;
+  }
+  document.getElementById('stats').innerHTML =
+    `<div class="stat"><b>${s.total}</b>celkem</div>` +
+    `<div class="stat"><b>${s.pending}</b>k revizi</div>` +
+    `<div class="stat"><b>${s.ok}</b>v pořádku</div>` +
+    `<div class="stat"><b>${s.discard}</b>zahozených</div>` +
+    `<span class="muted" style="font-size:11px;align-self:center">aktualizováno ${new Date().toLocaleTimeString('cs-CZ')}</span>` +
+    inboxInfo +
+    inboxBtn +
+    `<button class="refresh" onclick="refreshNow()">↻ Obnovit</button>` +
+    `<button class="refresh" style="border-color:var(--green);color:var(--green)" onclick="openNew()">➕ Nový filtr</button>` +
+    `<button class="refresh logout" onclick="logout()">⎋ Odhlásit</button>`;
+  document.getElementById('tabs').innerHTML =
+    [['all','Vše'],['pending','K revizi'],['ok','V pořádku'],['discard','Zahozené']]
+      .map(([k, label]) => `<button class="tab ${state.filter===k?'active':''}" onclick="setFilter('${k}')">${label} (${s[k]})</button>`).join('');
+}
+
+function setFilter(f) { state.filter = f; render(); }
+
+function criterionHTML(r) {
+  let h = r.sender
+    ? `<span class="sender">${esc(r.sender)}</span>`
+    : `<span class="sender">(libovolný odesílatel)</span>`;
+  if (r.recipient) h += ` <span class="part">× příjemce: ${esc(r.recipient)}</span>`;
+  if (r.subject_pattern) h += ` <span class="part">× předmět obsahuje „${esc(r.subject_pattern)}“</span>`;
+  if (!r.recipient && !r.subject_pattern && !r.sender) h += ` <span class="part">(jen odesílatel)</span>`;
+  return h;
+}
+
+function rowHTML(r) {
+  const labels = (r.labels || []).map(l => `<span class="chip label">${esc(l)}</span>`).join('');
+  const badge = `<span class="badge ${r.review_status}">${{pending:'K REVIZI', ok:'OK', discard:'ZAHOZENO'}[r.review_status]}</span>`;
+  const created = (r.learned_at || '').slice(0, 10);
+  let lastRun = '<span class="muted">—</span>';
+  if (r.last_run) {
+    if (r.last_run.status === 'done')
+      lastRun = `<span title="${esc((r.last_run.errors||[]).join('; '))}">${r.last_run.moved} přesunuto · ${esc((r.last_run.finished_at||'').slice(0,16).replace('T',' '))}</span>`;
+    else if (r.last_run.status === 'error')
+      lastRun = `<span style="color:var(--red)">chyba</span>`;
+    else
+      lastRun = `<span class="muted">${esc(r.last_run.status)}</span>`;
+  }
+  let actions;
+  if (r.review_status === 'discard') {
+    actions = `<button class="edit" onclick="openEdit(${r.id})">✏️</button>
+               <button class="restore" onclick="review(${r.id},'restore')">↩</button>`;
+  } else {
+    const busy = state.running != null;
+    const thisBusy = state.running === r.id;
+    actions = `${thisBusy ? '<span class="muted" title="běží…">⏳</span>' : ''}
+               <button class="run" title="Spustit na INBOX" ${busy ? 'disabled style="opacity:.4"' : ''} onclick="runRule(${r.id},'inbox')">▶</button>
+               <button class="run" title="Spustit na celý mailbox" ${busy ? 'disabled style="opacity:.4"' : ''} onclick="runRule(${r.id},'all')">▶▶</button>
+               <button class="edit" onclick="openEdit(${r.id})">✏️</button>
+               <button class="ok" onclick="review(${r.id},'ok')">✓</button>
+               <button class="disc" onclick="review(${r.id},'discard')">🗑</button>`;
+  }
+  return `<tr class="${r.review_status==='discard'?'discarded':''}">
+    <td><span class="chip id" title="ID pravidla — klik pro kopírování" onclick="copyId(${r.id})">#${r.id}</span></td>
+    <td class="criterion">${criterionHTML(r)}</td>
+    <td><span class="chip folder">${esc(r.folder)}</span>${r.forward_to ? ` <span class="chip" title="Přeposlat na" style="border-color:var(--accent)">⇢ ${esc(r.forward_to)}</span>` : ''}</td>
+    <td class="labels">${labels || '<span class="muted">—</span>'}</td>
+    <td>${badge}</td>
+    <td class="muted">${created}</td>
+    <td class="muted">${lastRun}</td>
+    <td class="actions">${actions}</td>
+  </tr>`;
+}
+
+function copyId(id) {
+  navigator.clipboard.writeText(String(id)).then(() => toast('ID ' + id + ' zkopírováno'));
+}
+
+function render() {
+  const list = sortRules(state.rules.filter(r => state.filter === 'all' || r.review_status === state.filter));
+  const cols = [
+    ['id', 'ID'],
+    ['criterion', 'Filtr (odesílatel × příjemce × předmět)'],
+    ['folder', 'Složka'],
+    ['labels', 'Labely'],
+    ['status', 'Stav'],
+    ['created', 'Vytvořeno'],
+    ['last_run', 'Poslední běh'],
+    ['', ''],
+  ];
+  const th = cols.map(([k, label]) => {
+    if (!k) return '<th></th>';
+    const arrow = state.sort.key === k ? (state.sort.dir === 1 ? ' ▲' : ' ▼') : '';
+    return `<th class="sortable" onclick="setSort('${k}')">${label}${arrow}</th>`;
+  }).join('');
+  document.getElementById('list').innerHTML = list.length
+    ? `<table class="rules"><thead><tr>${th}</tr></thead><tbody>${list.map(rowHTML).join('')}</tbody></table>`
+    : '<div class="empty">Žádná pravidla v této kategorii.</div>';
+  renderStats();
+}
+
+function setSort(key) {
+  if (state.sort.key === key) state.sort.dir *= -1;
+  else { state.sort.key = key; state.sort.dir = 1; }
+  render();
+}
+
+function sortRules(list) {
+  const { key, dir } = state.sort;
+  const val = r => {
+    switch (key) {
+      case 'id': return r.id || 0;
+      case 'criterion': return (r.sender || '').toLowerCase();
+      case 'folder': return (r.folder || '').toLowerCase();
+      case 'labels': return ((r.labels || []).join(',')).toLowerCase();
+      case 'status': return r.review_status || '';
+      case 'created': return r.learned_at || '';
+      case 'last_run': return (r.last_run && r.last_run.finished_at) || '';
+      default: return '';
+    }
+  };
+  return [...list].sort((a, b) => {
+    const va = val(a), vb = val(b);
+    if (va < vb) return -1 * dir;
+    if (va > vb) return 1 * dir;
+    return 0;
+  });
+}
+
+async function refreshNow() {
+  const btn = document.querySelector('button.refresh[onclick="refreshNow()"]');
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+  await load();
+  // manuální obnova stáhne i složky znovu (t, 2026-08-23)
+  const fr = await api('/api/folders/refresh', { method: 'POST' }).catch(() => ({}));
+  if (fr.ok) {
+    toast('Aktualizováno — stahuji složky…');
+    setTimeout(loadFolders, 8000);
+    setTimeout(loadFolders, 20000);
+  } else {
+    toast('Aktualizováno ' + new Date().toLocaleTimeString('cs-CZ'));
+  }
+}
+
+async function runRule(id, scope) {
+  if (state.running != null) { toast('⏳ Jiné pravidlo právě běží — počkej na dokončení'); return; }
+  const r = await api(`/api/rules/${id}/run`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ scope })
+  });
+  if (r.ok) {
+    // _waiting: poll musí vydržet i v mezeře mezi zařazením requestu a pick-up cronem
+    // (jinak d.running==null → poll skončil → 'poslední běh' se nikdy neobnovil, t 2026-08-24)
+    state._waiting = { id, requestedAt: r.requested_at || new Date().toISOString(), _since: Date.now() };
+    state.running = id;
+    toast('▶ Spuštěno (' + (scope === 'all' ? 'celý mailbox' : 'INBOX') + ') — zpracovávám…');
+    render();
+    // polling: dokud běží, aktualizuj; po dokončení se 'poslední běh' obnoví automaticky
+    if (state._pollTimer) clearInterval(state._pollTimer);
+    state._pollTimer = setInterval(async () => { await load(); }, 5000);
+  } else {
+    toast('Chyba: ' + (r.error || '?'));
+  }
+}
+
+async function review(id, status) {
+  const r = await api(`/api/rules/${id}/review`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ status })
+  });
+  if (r.ok) { await load(); toast(status === 'discard' ? 'Pravidlo zahozeno (už se nepoužije)' : status === 'restore' ? 'Pravidlo vráceno' : 'Pravidlo označeno jako v pořádku'); }
+  else toast('Chyba: ' + (r.error || '?'));
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 2500);
+}
+
+async function load() {
+  if (document.getElementById('login').classList.contains('open')) return;
+  if (!token) { showLogin(); return; }
+  const d = await api('/api/rules');
+  state.rules = d.rules || [];
+  state.running = d.running != null ? d.running : (state._waiting ? state._waiting.id : null);
+  if (state._waiting) {
+    const rule = (state.rules || []).find(x => x.id === state._waiting.id);
+    const lr = rule && rule.last_run;
+    // dokončeno = existuje result s finished_at >= requested_at
+    if (lr && lr.finished_at && lr.finished_at >= state._waiting.requestedAt) {
+      state._waiting = null;
+      state.running = null;
+    } else if (state._waiting._since && Date.now() - state._waiting._since > 300000) {
+      state._waiting = null; // safety timeout 5 min
+      state.running = null;
+    }
+  }
+  if (state._waiting == null && state.running == null && state._pollTimer) {
+    clearInterval(state._pollTimer); state._pollTimer = null;
+  }
+  // stav kompletního zpracování INBOX (t, 2026-09-01)
+  try {
+    const ib = await api('/api/inbox/process');
+    state.inboxRunning = !!ib.running;
+    state.inboxRun = ib.last || null;
+    if (state._inboxWaiting && ib.last && ib.last.finished_at && ib.last.finished_at >= state._inboxWaiting) {
+      state._inboxWaiting = null;
+      state.inboxRunning = false;
+      toast('✅ INBOX zpracován');
+    }
+  } catch (e) { /* keep last known */ }
+  render();
+  loadFolders();
+}
+
+async function runInboxProcess() {
+  if (state.running != null) { toast('⏳ Jiné pravidlo právě běží — počkej na dokončení'); return; }
+  if (state.inboxRunning) { toast('⏳ Zpracování INBOX už běží'); return; }
+  if (!confirm('Spustit kompletní zpracování INBOX podle všech pravidel?')) return;
+  const r = await api('/api/inbox/process', { method: 'POST' });
+  if (r.ok) {
+    state._inboxWaiting = r.requested_at || new Date().toISOString();
+    state.inboxRunning = true;
+    toast('⚡ Spouštím zpracování INBOX…');
+    render();
+    if (state._pollTimer) clearInterval(state._pollTimer);
+    state._pollTimer = setInterval(async () => { await load(); }, 5000);
+  } else {
+    toast('Chyba: ' + (r.error || '?'));
+  }
+}
+
+/* ── editace pravidla ─────────────────────────────────────── */
+const FOLDERS = [
+  'Folders/10_osobni/11_tomas','Folders/10_osobni/31_zvole',
+  'Folders/50_pracovni/51_bezouska','Folders/50_pracovni/52_inadvisors',
+  'Folders/50_pracovni/53_ipsd','Folders/50_pracovni/54_mmr',
+  'Folders/50_pracovni/70_prazske-noviny','Folders/50_pracovni/80_delta',
+  'Folders/90_ostatni/91_newsletter','Folders/90_ostatni/92_transakce',
+  'Folders/99_nezatrideno'
+];
+
+document.getElementById('folder-list').innerHTML = FOLDERS.map(f => `<option value="${esc(f)}">`).join('');
+
+// Reálné složky z mailboxu (fix t 2026-08-23: hardcoded seznam byl zastaralý,
+// chyběly např. Folders/90_ostatni/94_notifikace). Fallback = statický seznam.
+async function loadFolders() {
+  const d = await api('/api/folders');
+  const list = (d.folders && d.folders.length) ? d.folders : FOLDERS;
+  document.getElementById('folder-list').innerHTML = list.map(f => `<option value="${esc(f)}">`).join('');
+}
+
+let editId = null;
+
+function openNew() {
+  editId = null;
+  document.getElementById('modal-title').textContent = '➕ Nový filtr';
+  ['f-sender','f-recipient','f-subject','f-forward','f-folder','f-labels'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEdit(id) {
+  const r = state.rules.find(x => x.id === id);
+  if (!r) return;
+  editId = id;
+  document.getElementById('modal-title').textContent = '✏️ Upravit pravidlo';
+  document.getElementById('f-sender').value = r.sender || '';
+  document.getElementById('f-recipient').value = r.recipient || '';
+  document.getElementById('f-subject').value = r.subject_pattern || '';
+  document.getElementById('f-forward').value = r.forward_to || '';
+  document.getElementById('f-folder').value = r.folder || '';
+  document.getElementById('f-labels').value = (r.labels || []).join(', ');
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeEdit() {
+  document.getElementById('modal').classList.remove('open');
+  editId = null;
+}
+
+async function saveEdit() {
+  const body = {
+    sender: document.getElementById('f-sender').value.trim(),
+    recipient: document.getElementById('f-recipient').value.trim(),
+    subject_pattern: document.getElementById('f-subject').value.trim(),
+    forward_to: document.getElementById('f-forward').value.trim(),
+    folder: document.getElementById('f-folder').value.trim(),
+    labels: document.getElementById('f-labels').value
+  };
+  if (editId === null) {
+    // nový filtr (t, 2026-08-23)
+    const r = await api('/api/rules', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (r.ok) { closeEdit(); await load(); toast('Nový filtr uložen'); }
+    else toast('Chyba: ' + (r.error || '?'));
+    return;
+  }
+  const r = await api(`/api/rules/${editId}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (r.ok) { closeEdit(); await load(); toast('Pravidlo upraveno'); }
+  else toast('Chyba: ' + (r.error || '?'));
+}
+
+load();
+setInterval(load, 30000); // auto-refresh
+</script>
+</body>
+</html>

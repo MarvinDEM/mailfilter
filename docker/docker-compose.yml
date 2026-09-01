@@ -1,0 +1,45 @@
+# MailFilter — revize a správa pravidel třídění pošty (bezouska)
+# Samostatný projekt (přesun z rules-review, t 2026-08-23).
+# Doména: https://mailfilter.bezouska.cz  (fallback: rules-review.srv1479985.hstgr.cloud)
+# Auth: shared-auth (stejný systém jako CDprocesy) — JWT Bearer, app_key mailfilter (t 2026-08-23).
+services:
+  mailfilter:
+    build: .
+    container_name: mailfilter
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python3", "/app/server.py"]
+    environment:
+      - MAIL_RULES_DB=/data/bezouska-llm-queue.sqlite3
+      - SHARED_AUTH_DB_PATH=/app/shared-auth/data/shared-auth.db
+      - SHARED_AUTH_JWT_SECRET=eb53d4d4e2d1018baaee248f1a65110747a48b2c78bea2bcfb0ec4749e7abe88
+      - SHARED_AUTH_PUBLIC_BASE_URL=https://mailfilter.bezouska.cz
+    volumes:
+      - /root/.openclaw/workspace/scripts/rules-review/server.py:/app/server.py:ro
+      - /root/.openclaw/workspace/scripts/rules-review/site:/app/site:ro
+      - /root/.openclaw/workspace/bin/mail_rules.py:/app/bin/mail_rules.py:ro
+      - /root/.openclaw/workspace/state:/data:rw
+      - /root/.openclaw/workspace/shared-auth:/app/shared-auth:rw
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mailfilter.entrypoints=websecure
+      - traefik.http.routers.mailfilter.rule=Host(`mailfilter.bezouska.cz`)
+      - traefik.http.routers.mailfilter.tls.certresolver=letsencrypt
+      - traefik.http.routers.mailfilter-http.entrypoints=web
+      - traefik.http.routers.mailfilter-http.rule=Host(`mailfilter.bezouska.cz`)
+      - traefik.http.routers.mailfilter-http.middlewares=mailfilter-redirect
+      - traefik.http.routers.mailfilter-http.service=mailfilter
+      - traefik.http.middlewares.mailfilter-redirect.redirectscheme.scheme=https
+      - traefik.http.services.mailfilter.loadbalancer.server.port=8000
+      # fallback: stará hstgr adresa zůstává funkční (lesson 2026-05-31 — nechávat fallback)
+      - traefik.http.routers.mailfilter-legacy.entrypoints=websecure
+      - traefik.http.routers.mailfilter-legacy.rule=Host(`rules-review.srv1479985.hstgr.cloud`)
+      - traefik.http.routers.mailfilter-legacy.tls.certresolver=letsencrypt
+      - traefik.http.routers.mailfilter-legacy.service=mailfilter
+    networks:
+      - traefiknet
+
+networks:
+  traefiknet:
+    external: true
+    name: deploy_default

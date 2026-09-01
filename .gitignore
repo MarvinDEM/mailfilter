@@ -1,0 +1,24 @@
+# Runtime / data (nikdy do gitu)
+state/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.jsonl
+__pycache__/
+*.pyc
+tmp/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.pass
+
+# OS / editors
+*.bak
+*.editbak
+*.log
+.DS_Store
+
+# Lokální poznámky
+NOTES.local.md
