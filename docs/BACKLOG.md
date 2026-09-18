@@ -115,6 +115,17 @@ pravidel (https://mailfilter.bezouska.cz).
        stejný sender N× (default 3) ve stejné složce a žádné existující pravidlo
        → návrh `pending` k odsouhlasení ve webu. Běží dry-run/JSON.
 
+- [x] **MAILF-019** Reconciliation přepisovala `applied` → `gone` (souběžný běh)  ✅ 2026-09-18
+  - priority: P1 (odhaleno ostrým během)
+  - **Příčina:** ruční běh obcházel cron `flock` → dva souběžné běhy. První mail
+    přesunul (`applied`), druhý ho v INBOXu nenašel a rekonciliace ho přepsala
+    na terminální `gone` (kód nerozlišoval „zmizelo" od „bylo přesunuto").
+    Fyzicky byl mail správně v cíli; špatný byl jen stav ve frontě.
+  - **Řešení:** (1) guard `and status='needs_llm'` / `and status='manual_review'`
+    v obou reconcile updatech → terminální stav se nepřepíše; (2) in-process
+    `flock` lock v `main()` workeru (drží se po celý běh) → ruční běh nekoliduje
+    s cronem; (3) smoke `D5` (applied mail mimo INBOX zůstává applied).
+
 - [ ] **MAILF-016** Mrtvá učící smyčka (`Labels/zatridil tomas` prázdný) — *(D5)*
   - priority: P2
   - `learn_from_zatridil_tomas.py` je funkční, ale zdrojový label má **0 mailů**;
@@ -149,6 +160,16 @@ pravidel (https://mailfilter.bezouska.cz).
 
 ## Vyřešené / uzavřené
 
+- 2026-09-18: **GO-LIVE** — cron přepnut na `MAILFILTER_APPLY=1` (triage i second
+  pass) a `MAILFILTER_LLM_ENABLED=1` (second pass, `deepseek/deepseek-chat`).
+  Progresivní stropy: `MAX_LLM_CALLS=5`, `MAX_MESSAGES=100`, `MIN_CONF=0.6`.
+  Ověřený wrapper běh: 100 mailů zpracováno, 86 reálně přesunuto (INBOX 547→461),
+  5 LLM volání, 0 chyb, 51 nových `pending` návrhů pravidel (nic aktivováno).
+- 2026-09-18: **řízený APPLY vzorek** (5 mailů) reálně přesunut, ověřeno v mailboxu;
+  odhaleny a opraveny 4 bugy (reasoning model → `deepseek-chat`, confidence práh
+  0.8→0.6 konfigurovatelný, `propose_rule` nebumpuje `model_version`, sample-větev
+  `UnboundLocalError`). Smoke 17/17. Docs:
+  `01-docs/2026-09-18_mailfilter_apply-sample-a-nalezy_0v1.md`
 - 2026-09-18: detailní revize třídící logiky (10 vad D1–D10), report v `01-docs/`
 - 2026-09-01: `MAILF-002` mailfilter zaveden jako plnohodnotný projekt v project-hub
   (canonical struktura) + přidán do `PROJECTS` v `scripts/sync-proton-projects.sh`

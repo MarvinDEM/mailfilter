@@ -3,17 +3,22 @@ set -euo pipefail
 
 ROOT="/root/.openclaw/workspace"
 
-# FÁZE 1 (bezpečný režim, t 2026-09-18):
-#   MAILFILTER_APPLY=0  → mailbox se NEMĚNÍ; rozhodnutí se ukládají jako
-#                         'pending_apply' a aplikují se až po přepnutí na 1.
-#   MAILFILTER_LLM_ENABLED=0 → cron NEPÁLÍ kredity. LLM je implementovaný
-#                         (MAILF-001) a ověřený, ale zapne se až na pokyn t.
-# Pro zapnutí: MAILFILTER_APPLY=1 (přesuny) a/nebo MAILFILTER_LLM_ENABLED=1 (LLM).
-export MAILFILTER_APPLY="${MAILFILTER_APPLY:-0}"
-export MAILFILTER_LLM_ENABLED="${MAILFILTER_LLM_ENABLED:-0}"
-# Stropy proti nekontrolovanému pálení kreditů (platí jen když je LLM zapnutý).
-export MAILFILTER_MAX_LLM_CALLS="${MAILFILTER_MAX_LLM_CALLS:-2}"
-export MAILFILTER_MAX_MESSAGES="${MAILFILTER_MAX_MESSAGES:-20}"
+# GO LIVE (t 2026-09-18): reálné přesuny + model pass.
+#   MAILFILTER_APPLY=1        → mailbox se MĚNÍ (přesuny do cílových složek).
+#   MAILFILTER_LLM_ENABLED=1  → second pass volá levný model (deepseek/deepseek-chat)
+#                               přes lokální LiteLLM router. Ceny jsou hluboko
+#                               pod centem na běh; stropy drží runaway.
+# Vypnutí: MAILFILTER_APPLY=0 a/nebo MAILFILTER_LLM_ENABLED=0 (safe režim FÁZE 1).
+export MAILFILTER_APPLY="${MAILFILTER_APPLY:-1}"
+export MAILFILTER_LLM_ENABLED="${MAILFILTER_LLM_ENABLED:-1}"
+
+# Progresivní stropy (t 2026-09-18: „na začátku větší využití, postupně klesá").
+# 1 LLM call = až MAILFILTER_LLM_BATCH (20) mailů. 5×20 = 100 mailů/běh,
+# 2 běhy/hod → ~200 mailů/hod → počáteční nápor (~540) se vyřeší za ~3 h,
+# pak využití samo klesne (fronta se vyprázdní). Až nápor pomine, stropy snížit.
+export MAILFILTER_MAX_LLM_CALLS="${MAILFILTER_MAX_LLM_CALLS:-5}"
+export MAILFILTER_MAX_MESSAGES="${MAILFILTER_MAX_MESSAGES:-100}"
+export MAILFILTER_LLM_MIN_CONF="${MAILFILTER_LLM_MIN_CONF:-0.6}"
 
 "$ROOT/bin/cron-exec.sh" \
   "bezouska-inbox-triage-llm-second-pass" \

@@ -98,6 +98,12 @@ def seed_db(db, fixture):
     # 1 zombie manual_review (zpráva '999999' v INBOX není)
     conn.execute("INSERT INTO queue VALUES ('999999','zombie','y@bar.cz',NULL,NULL,NULL,'manual_review',3,NULL,'message not found in INBOX',NULL,NULL,?)",
                  ('2026-08-01T00:00:00+00:00',))
+    # MAILF-019 (t 2026-09-18): 'applied' záznam, jehož zpráva v INBOX není
+    # (byla reálně přesunuta). Reconciliation ho NESMÍ přepsat na 'gone' —
+    # jinak by se terminální stav aplikovaného mailu ztratil.
+    conn.execute("INSERT INTO queue VALUES ('777777','applied-moved','m@bar.cz',NULL,NULL,NULL,'applied',1,NULL,NULL,?,?,?)",
+                 (json.dumps({'folder': 'Folders/90_ostatni/91_newsletter', 'model_version': 0}),
+                  '2026-09-01T00:00:00+00:00', '2026-09-01T00:00:00+00:00'))
     conn.commit()
     conn.close()
     return noop_id, routed_id
@@ -174,6 +180,9 @@ def main():
         check('D1) second pass doběhne (rc=0)', p.returncode == 0, p.stderr[-200:])
         zombie = conn.execute("select status from queue where id='999999'").fetchone()[0]
         check('D2) MAILF-012 zombie manual_review → gone', zombie == 'gone', zombie)
+        moved = conn.execute("select status from queue where id='777777'").fetchone()[0]
+        check('D5) MAILF-019 applied mail mimo INBOX zůstává applied (ne gone)',
+              moved == 'applied', moved)
         if routed_id:
             rs = conn.execute("select status from queue where id=?", (routed_id,)).fetchone()[0]
             check('D3) APPLY=0: deterministické rozhodnutí → pending_apply (mailbox se nemění)',

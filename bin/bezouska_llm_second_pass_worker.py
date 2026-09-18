@@ -309,7 +309,31 @@ def recipient_of(msg):
     return ''
 
 
+LOCK_PATH = Path(os.environ.get('MAILFILTER_SP_LOCK', '/tmp/bezouska-triage-llm-second-pass.agentlock'))
+
+
+def _acquire_run_lock():
+    """MAILF-019 (t 2026-09-18): in-process lock, aby ruční běh nekolidoval
+    s cronem. Cron wrapper má flock, ale přímé ruční spuštění ho obchází —
+    dva souběžné běhy pak jeden přesune mail a druhý ho v INBOX už nenajde
+    a přepíše terminální stav na 'gone'. Lock držíme po celý běh.
+    """
+    import fcntl
+    fh = open(LOCK_PATH, 'w')
+    try:
+        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return None
+    fh.write(str(os.getpid()))
+    fh.flush()
+    return fh
+
+
 def main():
+    lock_fh = _acquire_run_lock()
+    if lock_fh is None:
+        print(json.dumps({'status': 'locked', 'note': 'another run holds the lock'}, ensure_ascii=False))
+        return
     conn = db_connect()
     # MAILFILTER_SAMPLE_IDS=1,2,3 → řízený malý vzorek (t 2026-09-18): zpracuje
     # POUZE uvedené zprávy, pro testovací běh s APPLY=1 na malém vzorku.
@@ -367,8 +391,12 @@ def main():
         msg = inbox_by_id.get(local_id)
         if msg is None:
             # MAILF-012: zpráva už v INBOX není → terminální stav 'gone', ne zombie
+            # MAILF-019 (t 2026-09-18): guard `and status='needs_llm'` — pokud
+            # mezitím jiný (souběžný) běh zprávu skutečně aplikoval ('applied'),
+            # NESMÍ se terminální stav přepsat na 'gone'. "Není v INBOX" totiž
+            # znamená i "bylo přesunuto", ne jen "zmizelo".
             conn.execute("update queue set status='gone', attempts=attempts+1, last_error=?, "
-                         "locked_at=NULL, updated_at=? where id=?",
+                         "locked_at=NULL, updated_at=? where id=? and status='needs_llm'",
                          ('message not found in INBOX', now_iso(), local_id))
             continue
         dec = mail_rules.classify_message(
@@ -514,7 +542,8 @@ def main():
             reconciled['still_present'] += 1
         else:
             conn.execute("update queue set status='gone', locked_at=NULL, updated_at=? "
-                         "where id=?", (now_iso(), local_id))
+                         "where id=? and status='manual_review'",
+                         (now_iso(), local_id))
             reconciled['gone'] += 1
     conn.commit()
 
