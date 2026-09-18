@@ -161,6 +161,13 @@ Nyní:
 volá `_alert_quota()` → `bin/escalate.py --case mailfilter-llm-quota --severity high`
 (deterministický Telegram alert). Bez toho by model pass tiše vracel prázdné výsledky.
 
+**Cron wrappery** (`bin/bezouska-inbox-triage-cron.sh`,
+`bin/bezouska-inbox-triage-llm-second-pass-cron.sh`) explicitně nastavují
+`MAILFILTER_APPLY=0` a `MAILFILTER_LLM_ENABLED=0` — FÁZE 1 (žádné přesuny) a
+**žádné tiché pálení kreditů**. LLM i přesuny se zapnou až na pokyn t.
+`attempts` se počítá jen když LLM reálně běží — s vypnutým LLM maily zbytečně
+nepadají do `manual_review`.
+
 `bin/bezouska_llm_worker.py` (volá `openclaw agent --local`) zůstává **mrtvý kód** —
 rozhodnutí t: nedržet obojí.
 

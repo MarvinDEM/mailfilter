@@ -427,8 +427,14 @@ def main():
                 # Pouze deterministické a LLM rozhodnutí s cílem se "zaparkují"
                 # k pozdějšímu APPLY; fallback (LLM nic) zůstává needs_llm.
                 if folder is None and not dec.get('llm'):
-                    # LLM nic nevrátil → zůstává ve frontě; po 3 pokusech k ruční revizi
-                    attempts = (row['attempts'] or 0) + 1
+                    # LLM nic nevrátil → zůstává ve frontě.
+                    # Pokus se počítá JEN když LLM reálně běžel (LLM_ENABLED);
+                    # s vypnutým LLM by jinak každý cron běh nafoukl attempts a
+                    # maily by zbytečně padaly do manual_review.
+                    if LLM_ENABLED:
+                        attempts = (row['attempts'] or 0) + 1
+                    else:
+                        attempts = row['attempts'] or 0
                     new_status = 'manual_review' if attempts >= 3 else 'needs_llm'
                     conn.execute("update queue set status=?, attempts=?, locked_at=NULL, "
                                  "updated_at=? where id=?", (new_status, attempts, now_iso(), local_id))
