@@ -34,12 +34,12 @@ def check(name, cond, detail=''):
     print(f"{'✅' if cond else '❌'} {name}" + (f" — {detail}" if detail else ''))
 
 
-def make_shim(dirpath):
+def make_shim(dirpath, fixture_path):
     shim = Path(dirpath) / 'himalaya'
     shim.write_text(f'''#!/usr/bin/env python3
 import json, sys, os
 args = sys.argv[1:]
-fixture = json.load(open({str(FIXTURE)!r}))
+fixture = json.load(open({str(fixture_path)!r}))
 page_size, page, folder = 200, 1, 'INBOX'
 for i, a in enumerate(args):
     if a == '--page-size': page_size = int(args[i+1])
@@ -83,16 +83,24 @@ def seed_db(db, fixture):
             noop_sender = sender
             break
     assert noop_id, 'fixture nemá mail bez folderu'
+    # Syntetický needs_llm mail, který heuristika deterministicky zařadí do složky
+    # (newsletter sender → 91_newsletter); ověří pending_apply pod APPLY=0.
+    routed_id, routed_subj, routed_sender = '8888', 'newsletter test', 'info@newsletter.cz'
+    rf, _rr = _mr.classify_folder(routed_subj, routed_sender)
+    assert rf, 'syntetický routed mail se nezařadil — fixtures/heuristika se rozešly'
     # 1 no-op applied záznam (rozhodnutí INBOX) s model_version=0
     conn.execute("INSERT INTO queue VALUES (?,?,?,NULL,NULL,NULL,'applied',1,NULL,NULL,?,NULL,?)",
                  (noop_id, noop_subj, noop_sender,
                   json.dumps({'folder': 'INBOX', 'model_version': 0}), '2026-08-01T00:00:00+00:00'))
+    # 1 needs_llm záznam, který heuristika zařadí do složky (→ pending_apply pod APPLY=0)
+    conn.execute("INSERT INTO queue VALUES (?,?,?,NULL,NULL,NULL,'needs_llm',0,NULL,NULL,NULL,NULL,?)",
+                 (routed_id, routed_subj, routed_sender, '2026-08-01T00:00:00+00:00'))
     # 1 zombie manual_review (zpráva '999999' v INBOX není)
     conn.execute("INSERT INTO queue VALUES ('999999','zombie','y@bar.cz',NULL,NULL,NULL,'manual_review',3,NULL,'message not found in INBOX',NULL,NULL,?)",
                  ('2026-08-01T00:00:00+00:00',))
     conn.commit()
     conn.close()
-    return noop_id
+    return noop_id, routed_id
 
 
 def run(env, script, extra=None):
@@ -108,9 +116,16 @@ def main():
     try:
         db = Path(tmp) / 'queue.sqlite3'
         os.environ['MAIL_RULES_DB'] = str(db)  # aby rodičovský import mail_rules nesahal na živou DB
-        make_shim(tmp)
         fixture = json.load(open(FIXTURE))
-        noop_id = seed_db(db, fixture)
+        # přidá syntetický routed mail, aby i IMAP read (shim) vracel zprávu
+        fixture = fixture + [{'id': '8888', 'flags': [], 'subject': 'newsletter test',
+                              'from': {'name': None, 'addr': 'info@newsletter.cz'},
+                              'to': {'name': None, 'addr': 'tomas@bezouska.cz'},
+                              'date': '2026-09-18 09:00+02:00', 'has_attachment': False}]
+        tmp_fx = Path(tmp) / 'inbox-snapshot.json'
+        tmp_fx.write_text(json.dumps(fixture, ensure_ascii=False), encoding='utf-8')
+        make_shim(tmp, tmp_fx)
+        noop_id, routed_id = seed_db(db, fixture)
 
         env = {
             'PATH': f'{tmp}:{os.environ["PATH"]}',
@@ -153,21 +168,27 @@ def main():
         noop_status = conn.execute("select status from queue where id=?", (noop_id,)).fetchone()[0]
         check('B3) po bumpu verze se no-op re-enqueue na needs_llm', noop_status == 'needs_llm', noop_status)
 
-        # D) second pass — zombie manual_review (999999) → gone, no-op dořešen
+        # D) second pass — zombie manual_review (999999) → gone;
+        #    deterministicky zařaditelný mail → pending_apply (APPLY=0)
         p = run(env, 'bezouska_llm_second_pass_worker.py')
         check('D1) second pass doběhne (rc=0)', p.returncode == 0, p.stderr[-200:])
         zombie = conn.execute("select status from queue where id='999999'").fetchone()[0]
         check('D2) MAILF-012 zombie manual_review → gone', zombie == 'gone', zombie)
+        if routed_id:
+            rs = conn.execute("select status from queue where id=?", (routed_id,)).fetchone()[0]
+            check('D3) APPLY=0: deterministické rozhodnutí → pending_apply (mailbox se nemění)',
+                  rs == 'pending_apply', rs)
         noop_status = conn.execute("select status from queue where id=?", (noop_id,)).fetchone()[0]
-        check('D3) APPLY=0: no-op se uloží jako pending_apply (mailbox se nemění)',
-              noop_status == 'pending_apply', noop_status)
+        check('D3b) APPLY=0 + LLM off: nevyřešený mail zůstává ve frontě (neztratí se)',
+              noop_status in ('needs_llm', 'manual_review'), noop_status)
 
         # D4) APPLY=1 → pending_apply se promítne na 'applied' bez LLM
         env_apply = dict(env)
         env_apply['MAILFILTER_APPLY'] = '1'
         p = run(env_apply, 'bezouska_llm_second_pass_worker.py')
-        noop_status = conn.execute("select status from queue where id=?", (noop_id,)).fetchone()[0]
-        check('D4) APPLY=1: pending_apply → applied', noop_status == 'applied', noop_status)
+        if routed_id:
+            rs = conn.execute("select status from queue where id=?", (routed_id,)).fetchone()[0]
+            check('D4) APPLY=1: pending_apply → applied', rs == 'applied', rs)
 
         # E) MAILF-015 generátor návrhů — dry-run, bez LLM
         p = run(env, 'mailfilter-rule-proposals.py', ['--dry-run', '--json', '--min', '1'])

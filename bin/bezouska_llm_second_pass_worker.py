@@ -399,11 +399,14 @@ def main():
             decisions[local_id] = dec
 
     # 3) aplikace rozhodnutí
-    # FÁZE 1: s APPLY=0 se NESMÍ zapsat 'applied' (mailbox se nemění) — jinak by
-    # model_version gate už mail nikdy nepřeřadil a při pozdějším APPLY=1 by se
-    # rozhodnutí ztratilo. Proto se uloží jako 'pending_apply'; po přepnutí na
-    # APPLY=1 se aplikují z uloženého decision_json BEZ dalšího LLM volání.
-    applied, failed, skipped = [], [], []
+    # FÁZE 1: s APPLY=0 se NESMÍ zapsat 'applied' (mailbox se nemění). Rozhodnutí
+    # s cílovou složkou se uloží jako 'pending_apply' a po přepnutí na APPLY=1 se
+    # aplikují z uloženého decision_json BEZ dalšího LLM volání.
+    # Bez APPLY a BEZ rozhodnutí (LLM nic nevrátil / je vypnutý) mail ZŮSTÁVÁ ve
+    # frontě jako 'needs_llm' — jinak by se nezařazené maily nenávratně ztratily.
+    # Výjimka: deterministický no-op (folder None = patří do INBOX) se ukončí,
+    # protože ten nemá smysl donekonečna přepočítávat.
+    applied, failed, skipped, noop_decided = [], [], [], []
     pending_apply = []
     model_version = mail_rules.get_model_version(conn)
     for row in pending:
@@ -412,14 +415,26 @@ def main():
             continue
         dec = decisions[local_id]
         labels = list(dict.fromkeys(dec.get('proton_labels', [])))
+        folder = dec.get('folder')
         payload = {'id': local_id, 'message_id': row['message_id'],
-                   'folder': dec.get('folder') or 'INBOX', 'labels': labels,
+                   'folder': folder or 'INBOX', 'labels': labels,
                    'reason': dec.get('reason'), 'confidence': dec.get('confidence', 0.7),
                    'model_version': model_version}
-        if dec.get('folder') is None:
+        if folder is None:
             payload['note'] = 'no rule match — zůstává v INBOX'
         try:
             if not APPLY:
+                # Pouze deterministické a LLM rozhodnutí s cílem se "zaparkují"
+                # k pozdějšímu APPLY; fallback (LLM nic) zůstává needs_llm.
+                if folder is None and not dec.get('llm'):
+                    # LLM nic nevrátil → zůstává ve frontě; po 3 pokusech k ruční revizi
+                    attempts = (row['attempts'] or 0) + 1
+                    new_status = 'manual_review' if attempts >= 3 else 'needs_llm'
+                    conn.execute("update queue set status=?, attempts=?, locked_at=NULL, "
+                                 "updated_at=? where id=?", (new_status, attempts, now_iso(), local_id))
+                    skipped.append({'id': local_id, 'reason': 'unresolved (needs LLM)',
+                                    'attempts': attempts, 'status': new_status})
+                    continue
                 conn.execute("update queue set status='pending_apply', decision_json=?, "
                              "locked_at=NULL, last_error=NULL, updated_at=? where id=?",
                              (json.dumps(payload, ensure_ascii=False), now_iso(), local_id))
@@ -427,8 +442,8 @@ def main():
                 continue
             for label in labels:
                 copy_to_label('INBOX', label, local_id)
-            if dec.get('folder') is not None:
-                move('INBOX', dec['folder'], local_id)
+            if folder is not None:
+                move('INBOX', folder, local_id)
             conn.execute("update queue set status='applied', decision_json=?, applied_at=?, "
                          "locked_at=NULL, last_error=NULL, updated_at=? where id=?",
                          (json.dumps(payload, ensure_ascii=False), now_iso(), now_iso(), local_id))
@@ -463,16 +478,15 @@ def main():
         conn.commit()
 
     # MAILF-012: rekonciliace zombie 'manual_review' záznamů (bounded).
-    # Záznam, jehož zpráva už v INBOX není, se označí terminálně 'gone';
-    # záznam, jehož zpráva se vrátila, se vrátí do fronty.
-    reconciled = {'gone': 0, 'requeued': 0}
+    # Záznam, jehož zpráva už v INBOX není, se označí terminálně 'gone'.
+    # Záznam, jehož zpráva v INBOX JE, zůstává 'manual_review' (patří do lidské
+    # fronty) — neposílat zpět do 'needs_llm', jinak by se přepočítával dokola.
+    reconciled = {'gone': 0, 'still_present': 0}
     for row in conn.execute(
             "select id from queue where status='manual_review' limit 200").fetchall():
         local_id = str(row['id'])
         if local_id in inbox_by_id:
-            conn.execute("update queue set status='needs_llm', locked_at=NULL, updated_at=? "
-                         "where id=?", (now_iso(), local_id))
-            reconciled['requeued'] += 1
+            reconciled['still_present'] += 1
         else:
             conn.execute("update queue set status='gone', locked_at=NULL, updated_at=? "
                          "where id=?", (now_iso(), local_id))

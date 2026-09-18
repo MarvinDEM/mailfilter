@@ -36,11 +36,16 @@ LLM je navíc odděleně ovladatelný:
 - `MAILFILTER_LLM_ENABLED` (default `1`) — hard off switch.
 - `MAILFILTER_LLM_DRYRUN=1` — klasifikace se spočítá, ale LLM se nevolá.
 
-**Stav `pending_apply`:** s `APPLY=0` se rozhodnutí NESMÍ zapsat jako `applied`
-(mailbox se nemění) — jinak by `model_version` gate mail už nikdy nepřeřadil a
-při pozdějším `APPLY=1` by se rozhodnutí ztratilo. Proto se uloží jako
+**Stav `pending_apply`:** s `APPLY=0` se rozhodnutí s cílovou složkou NESMÍ zapsat
+jako `applied` (mailbox se nemění) — jinak by `model_version` gate mail už nikdy
+nepřeřadil a při pozdějším `APPLY=1` by se rozhodnutí ztratilo. Proto se uloží jako
 `pending_apply`; po přepnutí na `APPLY=1` se aplikují z uloženého `decision_json`
 **bez dalšího LLM volání** (funkce `promoted`).
+
+**Nevyřešené maily se NEztrácí:** pokud LLM nic nevrátí (nebo je vypnutý), mail
+zůstává ve frontě `needs_llm` — neparkuje se jako `pending_apply` a po 3 pokusech
+jde do `manual_review`. Parkuje se jen rozhodnutí, které má cíl (deterministické
+pravidlo/heuristika, nebo vysoko-konfidenční LLM).
 
 ---
 
@@ -118,10 +123,11 @@ modelu — **bez churn každých 15 min**:
 Second pass při každém běhu projde až 200 záznamů ve stavu `manual_review`:
 
 - zpráva v INBOX není → terminální stav `gone` (+ `last_error`);
-- zpráva se vrátila → `needs_llm` (znovu se zpracuje).
+- zpráva v INBOX je → zůstává `manual_review` (patří do lidské fronty; zpět do
+  `needs_llm` se neposílá, jinak by se přepočítávala dokola).
 
 Stav `gone` je terminální — `enqueue_candidate()` i `queue_counts()` ho znají.
-Výsledek se hlásí v `summary.reconciled = {gone, requeued}`.
+Výsledek se hlásí v `summary.reconciled = {gone, still_present}` (živě: 34 → `gone`).
 
 ---
 
@@ -191,12 +197,13 @@ temp DB** a **falešném `himalaya` shimu** — žádný reálný IMAP, žádné
 | A | MAILF-011 — `list_env_all` přečte celý mailbox (200 mailů po 50) |
 | B1–B3 | MAILF-010 — no-op `applied` bez bumpu zůstává (no churn); po bumpu → `needs_llm` |
 | C1–C2 | MAILF-013 — triage i second pass delegují na `mail_rules.classify_message` |
-| D1–D3 | MAILF-012 — zombie `manual_review` → `gone`; APPLY=0 uloží `pending_apply` |
+| D1–D3 | MAILF-012 — zombie `manual_review` → `gone` |
+| D3b | APPLY=0 + LLM off — nevyřešený mail zůstává ve frontě (neztratí se) |
 | D4 | APPLY=1 — `pending_apply` → `applied` bez LLM |
 | E1–E2 | MAILF-015 — rule-proposals běží a vrací strukturovaný návrh |
 | F1–F2 | MAILF-014 — oba passy `confirmed_only=True` |
 
-**Výsledek: 14/14 OK** (workspace `bin/` i mirror `mailfilter/bin/`).
+**Výsledek: 15/15 OK** (workspace `bin/` i mirror `mailfilter/bin/`).
 
 Spuštění: `python3 bin/tests/mailfilter-smoke.py`
 
