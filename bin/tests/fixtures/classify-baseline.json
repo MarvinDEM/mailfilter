@@ -1,0 +1,3062 @@
+{
+ "triage": [
+  {
+   "id": "2316",
+   "subject": "Potvrzení objednávky vstupenek",
+   "from": "vstupenky@ticketportal.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2307",
+   "subject": "📊 Denní přehled — 17. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2304",
+   "subject": "Download Your ISACA Digital Membership Card",
+   "from": "isaca@tr.isaca.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2295",
+   "subject": "Přinášíme novou možnost úročení spořicího účtu a měníme související dokumenty",
+   "from": "info@airbank.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [
+    "finance"
+   ],
+   "labels": [
+    "finance"
+   ]
+  },
+  {
+   "id": "2296",
+   "subject": "🦾 Claude's simplified upgrade",
+   "from": "superhuman@mail.joinsuperhuman.ai",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2291",
+   "subject": "[E-mailový klub]: Co tě může naučit kokosové kari",
+   "from": "klub@kucharkaprodceru.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2290",
+   "subject": "50% off your first month of Infograpia AI",
+   "from": "hello@news.infograpia.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2285",
+   "subject": "Změnili jsme limity podnikatelské karty číslo 514878******2325",
+   "from": "info@airbank.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [
+    "finance"
+   ],
+   "labels": [
+    "finance"
+   ]
+  },
+  {
+   "id": "2281",
+   "subject": "EU AI Act: Jaký typ obsahu musíte označovat?",
+   "from": "novinky@od.konec-prokrastinace.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2279",
+   "subject": "📊 Denní přehled — 16. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2275",
+   "subject": "XTB CZ: Změna smluvní dokumentace a Tabulky poplatků a provizí",
+   "from": "support@mail.xtb.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2269",
+   "subject": "New Recipe Live!",
+   "from": "webmaster@joshuaweissman.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2268",
+   "subject": "Product Update: Introducing Your New CalendarBridge Portal!",
+   "from": "updates@calendarbridge.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2266",
+   "subject": "[E-mailový klub]: Zkouška spojení",
+   "from": "klub@kucharkaprodceru.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2265",
+   "subject": "🤯 ChatGPT's co-inventor drops a model that can't hallucinate",
+   "from": "superhuman@mail.joinsuperhuman.ai",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2256",
+   "subject": "Neuhrazené faktury 04, 05, 06 a 07/2026",
+   "from": "telefony@donativo.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2255",
+   "subject": "Nenechte si ujít: Bitcoin bez mýtů",
+   "from": "info@nl.partnersbanka.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2250",
+   "subject": "Your September International Exchange Alumni Updates",
+   "from": "exchangealumni@state.gov",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2245",
+   "subject": "Předplatné Zákony pro lidi PLUS Vám brzy skončí. Využijte naše slevy!",
+   "from": "info@zakonyprolidi.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2238",
+   "subject": "📊 Denní přehled — 15. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2234",
+   "subject": "Updates to our Terms of Service and Privacy Policy",
+   "from": "no-reply@notices.dropbox.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2217",
+   "subject": "✋ Jensen and Trump hit back at AI labs",
+   "from": "superhuman@mail.joinsuperhuman.ai",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2215",
+   "subject": "A Hiring Manager is interested in your profile",
+   "from": "notifications@email.intch.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2214",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-15",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2213",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-15",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2208",
+   "subject": "Filament Prices Just Dropped!",
+   "from": "hello@email.bambulab.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2207",
+   "subject": "Renovated homes for sale in Italy under €300,000 ",
+   "from": "idealista@mailing.idealista.it",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2205",
+   "subject": "Bright Data: 2-Step Verification token",
+   "from": "noreply@bright-notice.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2202",
+   "subject": "Regály s dlouhým rozpětím: když je objem stejně důležitý jako prostor",
+   "from": "info@master-rax.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2201",
+   "subject": "REMINDER: Defense of Europe: A Perspective from Finland / 17. 9. 2026 / 16:00",
+   "from": "pctr@pctr.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2194",
+   "subject": "Váš nový průkaz pojištěnce se už vyrábí",
+   "from": "noreply@vzp.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2191",
+   "subject": "Upozornění na neuhrazené pojistné smlouvy číslo 3952050390",
+   "from": "info@info.koop.cz",
+   "folder": null,
+   "reason": "generic-alert",
+   "semantic": [
+    "alerts",
+    "00_vyresit"
+   ],
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "2190",
+   "subject": "📊 Denní přehled — 14. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2184",
+   "subject": "An Important ISACA Member Vote Is Coming",
+   "from": "isaca@tr.isaca.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2180",
+   "subject": "Přihlášení k DomekUMore",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2179",
+   "subject": "Přihlášení k DomekUMore",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2178",
+   "subject": "Přihlášení k DomekUMore",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2177",
+   "subject": "Přihlášení k DomekUMore",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2176",
+   "subject": "Přihlášení k DomekUMore",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2175",
+   "subject": "⚔️ Amodei's (controversial) call to arms",
+   "from": "superhuman@mail.joinsuperhuman.ai",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2171",
+   "subject": "Máte poslední možnost na vyzvednutí nákupu 1057893840",
+   "from": "sluzebnicek@alza.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2168",
+   "subject": "Už zítra! Prodej vstupenek končí dnes o půlnoci.",
+   "from": "michal.stranecky@info.cevro.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2167",
+   "subject": "Klub gentlemanů, 15.10.2026 ",
+   "from": "office@infocom.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2165",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-14",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2164",
+   "subject": "💥 Chcete konečně udělat změnu, která vydrží?",
+   "from": "novinky@od.konec-prokrastinace.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2163",
+   "subject": "🐾 Tohle kupují chovatelé koček nejčastěji",
+   "from": "info@nl.veselezvire.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2162",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-14",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2159",
+   "subject": "DomekUMore týdenní report 2026-09-14",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2149",
+   "subject": "📊 Denní přehled — 13. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2147",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2146",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2145",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2144",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2141",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2140",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2137",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2135",
+   "subject": "Churchill opět v Praze?",
+   "from": "michal.stranecky@info.cevro.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2134",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2133",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2132",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-13",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2128",
+   "subject": "Připraveno v AlzaBoxu / Obj. č. 1057893840",
+   "from": "sluzebnicek@alza.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2127",
+   "subject": "📊 Denní přehled — 12. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2124",
+   "subject": "Už to chystáme. / Obj. č. 1057893840",
+   "from": "sluzebnicek@alza.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2121",
+   "subject": "Why Does Git Revert Cause Conflicts?",
+   "from": "bytebytego@mail.beehiiv.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2107",
+   "subject": "Informace o vaší platbě z admin.webglobe.cz",
+   "from": "no-reply@gopay.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2103",
+   "subject": "Informace o vaší platbě z admin.webglobe.cz",
+   "from": "no-reply@gopay.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2099",
+   "subject": "Attention Needed: DeepSeek Account Balance Low",
+   "from": "support@sc.mail.deepseek.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2094",
+   "subject": "📊 Denní přehled — 11. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2092",
+   "subject": "[DELTA Advisory] Některé šablony byly automaticky aktualizovány",
+   "from": "wordpress@delta-advisory.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2087",
+   "subject": "Doprava na celou objednávku ZDARMA 🚚",
+   "from": "info@nl.veselezvire.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2084",
+   "subject": "Meet the plugins that can take work off your plate",
+   "from": "noreply@email.openai.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2083",
+   "subject": "XTB: Tabulka swapových bodů a nákladů na financování přes noc",
+   "from": "support@mail.xtb.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2078",
+   "subject": "Yubii Regained Connection to Yubii Cloud",
+   "from": "no-reply-cloud@yubii.cloud",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2079",
+   "subject": "Announcement on Continuation of the DeepSeek V4 Pro API Service",
+   "from": "support@sc.mail.deepseek.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2077",
+   "subject": "XTB CZ: Změna smluvní dokumentace a Specifikačních tabulek",
+   "from": "support@mail.xtb.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2075",
+   "subject": "Zbývají poslední místa na oslavu CEVRO Univerzity",
+   "from": "michal.stranecky@info.cevro.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2059",
+   "subject": "📊 Denní přehled — 10. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2053",
+   "subject": "Your free trial has ended",
+   "from": "support_at_fr24_com_g647phhd69_ca6f57a8@privaterelay.appleid.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2050",
+   "subject": "Infograpia AI is here. Create presentations in minutes 🚀",
+   "from": "hello@news.infograpia.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2048",
+   "subject": "A Hiring Manager is interested in your profile",
+   "from": "notifications@email.intch.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2040",
+   "subject": "[E-mailový klub]: Večeře, která se uvaří sama",
+   "from": "klub@kucharkaprodceru.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2037",
+   "subject": "JEN DNES: Sleva 500 Kč na vstupenku na konferenci ⚠️",
+   "from": "novinky@od.growjob.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2034",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-10",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2033",
+   "subject": "Announcement on Postponement of the DeepSeek V4 Pro Service Discontinuation",
+   "from": "support@sc.mail.deepseek.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2032",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-10",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2030",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-10",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2029",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-10",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2028",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-10",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2027",
+   "subject": "📊 Denní přehled — 9. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2026",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-10",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2025",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2023",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2022",
+   "subject": "Defense of Europe: A Perspective from Finland",
+   "from": "pctr@pctr.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2021",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2020",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2019",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2018",
+   "subject": "🎉 You have $33.41 ready to relend!",
+   "from": "contactus@news.kiva.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2017",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2015",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2013",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2012",
+   "subject": "🚚 Doprava zdarma je tady! Ulovte si nové čtení",
+   "from": "info@knihobot.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2010",
+   "subject": "But Better is Back!",
+   "from": "webmaster@joshuaweissman.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2008",
+   "subject": "Nenechte svou TchiboCard propadnout",
+   "from": "service@service.tchibo.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2007",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2006",
+   "subject": "Announcement on DeepSeek V4.1 Flash API Pricing",
+   "from": "support@sc.mail.deepseek.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2004",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2001",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "2000",
+   "subject": "Vzkaz od Ivana Langera – zbývá poslední týden!",
+   "from": "michal.stranecky@info.cevro.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1999",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1996",
+   "subject": "What Affects Your Print Quality?",
+   "from": "hello@email.bambulab.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1995",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1992",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1990",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1987",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-09",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1986",
+   "subject": "⏰ Poslední šance na nejlevnější vstupenku – jen do půlnoci",
+   "from": "novinky@od.growjob.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1976",
+   "subject": "📊 Denní přehled — 8. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1973",
+   "subject": "You're invited to IT Governance konference: Řízení služeb k bezpečnosti",
+   "from": "mail@engage.isaca.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1972",
+   "subject": "You're invited to Klubový večer/Discussion Event: Insights into AI-Related Threats and Tactics",
+   "from": "mail@engage.isaca.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1965",
+   "subject": "Majster Regál je nyní Master Rax",
+   "from": "info@master-rax.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1960",
+   "subject": "Your Gold free trial is coming to an end",
+   "from": "support_at_fr24_com_g647phhd69_ca6f57a8@privaterelay.appleid.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1950",
+   "subject": "📊 Denní přehled — 7. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1948",
+   "subject": "A quick question about AI + your PKM system",
+   "from": "hello@linkingyourthinking.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1944",
+   "subject": "Potvrzení o úhradě",
+   "from": "no-reply@edalnice.gov.cz",
+   "folder": null,
+   "reason": "gov-cz-domain",
+   "semantic": [
+    "work"
+   ],
+   "labels": []
+  },
+  {
+   "id": "1941",
+   "subject": "Potvrzení o převzetí balíku NB7461637674M",
+   "from": "balikovna@balikovna.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1939",
+   "subject": "Dokončení registrace do Moje Balíkovna",
+   "from": "noreply@balikovna.cz",
+   "folder": null,
+   "reason": "domain-admin-keyword",
+   "semantic": [
+    "alerts",
+    "00_vyresit"
+   ],
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1936",
+   "subject": "⏳ Nejnižší cena jen do středeční půlnoci",
+   "from": "novinky@od.growjob.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1935",
+   "subject": "Doprava na celou objednávku ZDARMA 🚚",
+   "from": "info@nl.veselezvire.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1928",
+   "subject": "DomekUMore týdenní report 2026-09-07",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1926",
+   "subject": "PPL – Vaši zásilku budeme dnes doručovat",
+   "from": "support@ppl.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1924",
+   "subject": "Vaše doporučení má svou cenu",
+   "from": "info@nl.partnersbanka.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1919",
+   "subject": "📊 Denní přehled — 6. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1917",
+   "subject": "Co konkrétně odhalí náš online test vaší firmy?",
+   "from": "info@mail.otrokvlastnifirmy.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1915",
+   "subject": "Přihlášení k DomekUMore",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1914",
+   "subject": "One time password",
+   "from": "support@ouraring.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1913",
+   "subject": "One time password",
+   "from": "support@ouraring.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1911",
+   "subject": "A Hiring Manager is interested in your profile",
+   "from": "notifications@email.intch.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1910",
+   "subject": "📚 Máte doma přečtené knihy?",
+   "from": "info@knihobot.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1902",
+   "subject": "Omluva - chybně zaslaný notifikační e-mail blížící se rezervaci /Apology - Incorrectly Sent Notification Email Regarding an Upcoming Reservation",
+   "from": "dogcenterpluto@gmail.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1897",
+   "subject": "Deco Account Verification Code",
+   "from": "no-reply@email.tp-link.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1896",
+   "subject": "Objevte benefity svého internetu",
+   "from": "novinky@email.o2.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1882",
+   "subject": "Earn Cash for Sharing Starlink",
+   "from": "no-reply@starlink.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1880",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-05",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1878",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-05",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1873",
+   "subject": "Yubii Regained Connection to Yubii Cloud",
+   "from": "no-reply-cloud@yubii.cloud",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1868",
+   "subject": "Re: Action required: Your VPS has exceeded its resource limit — srv1479985 CPU steal ~90%",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "generic-alert",
+   "semantic": [
+    "alerts",
+    "00_vyresit"
+   ],
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1866",
+   "subject": "Re: Action required: Your VPS has exceeded its resource limit — srv1479985 CPU steal ~90%",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "generic-alert",
+   "semantic": [
+    "alerts",
+    "00_vyresit"
+   ],
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1860",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-05",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1856",
+   "subject": "📊 Denní přehled — 4. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1845",
+   "subject": "XTB: Tabulka swapových bodů / financování přes noc",
+   "from": "support@mail.xtb.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1844",
+   "subject": "💣 Nové knihy v akci 10 za 250 Kč",
+   "from": "info@knihobot.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1840",
+   "subject": "PPL – Převzali jsme Vaši zásilku",
+   "from": "support@ppl.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1838",
+   "subject": "Donate to Nepal relief efforts and we’ll match it",
+   "from": "info@mp1.tripadvisor.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1837",
+   "subject": "Máte poslední možnost na vyzvednutí nákupu 1056319000",
+   "from": "sluzebnicek@alza.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1836",
+   "subject": "Balík NB7461637674M už na Vás čeká",
+   "from": "balikovna@balikovna.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1821",
+   "subject": "📊 Denní přehled — 3. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1815",
+   "subject": "Informace o vaší platbě z www.falcokrmiva.com",
+   "from": "no-reply@gopay.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1813",
+   "subject": "Informace o vaší platbě z www.falcokrmiva.com",
+   "from": "no-reply@gopay.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1808",
+   "subject": "Změny v parkování i konec uzávěr: Co se po prázdnínách mění v pražské dopravě? 🚧",
+   "from": "info@citymove.app",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1806",
+   "subject": "Váš balík NB7461637674M je v našich rukách",
+   "from": "balikovna@balikovna.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1803",
+   "subject": "Who's on stage at Waves '26 🎤 and how to shape what Make builds next",
+   "from": "info@make.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1802",
+   "subject": "🔴 Bonus letter | Proč si plánovat týden už v pátek",
+   "from": "bonusletter@od.konec-prokrastinace.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1798",
+   "subject": "[E-mailový klub]: Recept ze zapomenutého světa",
+   "from": "klub@kucharkaprodceru.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1793",
+   "subject": "Připraveno v AlzaBoxu / Obj. č. 1056319000",
+   "from": "sluzebnicek@alza.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1792",
+   "subject": "📊 Denní přehled — 2. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1788",
+   "subject": "Kód na jedno použití",
+   "from": "account-security-noreply@accountprotection.microsoft.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1787",
+   "subject": "Máte strach z odchodu klíčového člověka z firmy?",
+   "from": "info@mail.otrokvlastnifirmy.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1785",
+   "subject": "You have $31.72 ready to relend!",
+   "from": "contactus@news.kiva.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1784",
+   "subject": "Už to chystáme. / Obj. č. 1056319000",
+   "from": "sluzebnicek@alza.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1782",
+   "subject": "Děkujeme za objednávku 1056319000",
+   "from": "sluzebnicek@alza.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1775",
+   "subject": "New Recipe Live!",
+   "from": "webmaster@joshuaweissman.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1774",
+   "subject": "Co číst po knize Italština nejen pro samouky. Klíč, slovník?",
+   "from": "info@knihobot.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1767",
+   "subject": "Vy ještě nemáte vstupenku?",
+   "from": "michal.stranecky@info.cevro.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1750",
+   "subject": "📊 Denní přehled — 1. 9. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1747",
+   "subject": "A Hiring Manager is interested in your profile",
+   "from": "notifications@email.intch.org",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1745",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-01",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1743",
+   "subject": "Affordable new-build homes for sale in Italy",
+   "from": "idealista@mailing.idealista.it",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1744",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-01",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1741",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-01",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1740",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-01",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1739",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-01",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1738",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-01",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1733",
+   "subject": "Bezpečnostní upozornění",
+   "from": "no-reply@accounts.google.com",
+   "folder": null,
+   "reason": "generic-alert",
+   "semantic": [
+    "alerts",
+    "00_vyresit"
+   ],
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1732",
+   "subject": "Proton sync ⚠️ ČÁSTEČNĚ SELHAL — 2026-09-01",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1822",
+   "subject": "O2 Security - pravidelný souhrn internetových hrozeb",
+   "from": "o2security@o2.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1723",
+   "subject": "💬 Zářijový Byro Talk: Kdy (ne)musí úředník mlčet?",
+   "from": "anezka@mailing.byro.works",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1721",
+   "subject": "Registrace otevřena: Prague Security Dialogue 2026",
+   "from": "office@politicsandsociety.cz",
+   "folder": null,
+   "reason": "domain-admin-keyword",
+   "semantic": [
+    "alerts",
+    "00_vyresit"
+   ],
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1725",
+   "subject": "The Best IPO of 2026",
+   "from": "noreply@hightoweruk.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1713",
+   "subject": "Srpen ve Fakturoidu",
+   "from": "mesicni@fakturoid.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1710",
+   "subject": "📊 Denní přehled — 31. 8. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1706",
+   "subject": "[DomekUMore] 🚨 FB session expiruje — nutná obnova",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1704",
+   "subject": "[DomekUMore] 🚨 FB session expiruje — nutná obnova",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1701",
+   "subject": "ElevenLabs August Developer Update",
+   "from": "developers@contact.elevenlabs.io",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1699",
+   "subject": "GLS - Doručili jsme váš balík od knihobot.cz",
+   "from": "noreply@gls-czech.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1698",
+   "subject": "Sleva 10 % na vinylové podlahy Quick-Step již pouze dnes",
+   "from": "info@yesinterier.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1694",
+   "subject": "Vzkaz od Terezie Tománkové",
+   "from": "michal.stranecky@info.cevro.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1685",
+   "subject": "Reminder: \"What does the West get wrong about Beijing?\" Lecture by Dr. Emilie Szwajnoch",
+   "from": "caps@info.cevro.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1682",
+   "subject": "DomekUMore týdenní report 2026-08-31",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1680",
+   "subject": "Vaše Premium členství bylo prodlouženo",
+   "from": "aplikace@vaspraktikpraha.cz",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1670",
+   "subject": "📊 Denní přehled — 30. 8. 2026",
+   "from": "lodivod@protonmail.ch",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  },
+  {
+   "id": "1666",
+   "subject": "GLS - Váš balík od knihobot.cz stále čeká na vyzvednutí",
+   "from": "noreply@gls-czech.com",
+   "folder": null,
+   "reason": "fallback-unclassified",
+   "semantic": [],
+   "labels": []
+  }
+ ],
+ "secondpass": [
+  {
+   "id": "2316",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2307",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2304",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2295",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": [
+    "finance"
+   ]
+  },
+  {
+   "id": "2296",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2291",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2290",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2285",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": [
+    "finance"
+   ]
+  },
+  {
+   "id": "2281",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2279",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2275",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2269",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2268",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2266",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2265",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2256",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2255",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2250",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2245",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2238",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2234",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2217",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2215",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2214",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2213",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2208",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2207",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2205",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2202",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2201",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2194",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2191",
+   "folder": null,
+   "reason": "generic-alert",
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "2190",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2184",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2180",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2179",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2178",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2177",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2176",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2175",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2171",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2168",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2167",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2165",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2164",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2163",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2162",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2159",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2149",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2147",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2146",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2145",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2144",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2141",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2140",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2137",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2135",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2134",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2133",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2132",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2128",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2127",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2124",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2121",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2107",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2103",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2099",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2094",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2092",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2087",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2084",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2083",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2078",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2079",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2077",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2075",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2059",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2053",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2050",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2048",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2040",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2037",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2034",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2033",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2032",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2030",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2029",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2028",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2027",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2026",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2025",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2023",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2022",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2021",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2020",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2019",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2018",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2017",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2015",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2013",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2012",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2010",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2008",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2007",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2006",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2004",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2001",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "2000",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1999",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1996",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1995",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1992",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1990",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1987",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1986",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1976",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1973",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1972",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1965",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1960",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1950",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1948",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1944",
+   "folder": null,
+   "reason": "gov-cz-domain",
+   "labels": []
+  },
+  {
+   "id": "1941",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1939",
+   "folder": null,
+   "reason": "domain-admin-keyword",
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1936",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1935",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1928",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1926",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1924",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1919",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1917",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1915",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1914",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1913",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1911",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1910",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1902",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1897",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1896",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1882",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1880",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1878",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1873",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1868",
+   "folder": null,
+   "reason": "generic-alert",
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1866",
+   "folder": null,
+   "reason": "generic-alert",
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1860",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1856",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1845",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1844",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1840",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1838",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1837",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1836",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1821",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1815",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1813",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1808",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1806",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1803",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1802",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1798",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1793",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1792",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1788",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1787",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1785",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1784",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1782",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1775",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1774",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1767",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1750",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1747",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1745",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1743",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1744",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1741",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1740",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1739",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1738",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1733",
+   "folder": null,
+   "reason": "generic-alert",
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1732",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1822",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1723",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1721",
+   "folder": null,
+   "reason": "domain-admin-keyword",
+   "labels": [
+    "vyresit"
+   ]
+  },
+  {
+   "id": "1725",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1713",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1710",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1706",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1704",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1701",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1699",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1698",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1694",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1685",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1682",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1680",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1670",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  },
+  {
+   "id": "1666",
+   "folder": null,
+   "reason": "fallback-low-confidence",
+   "labels": []
+  }
+ ]
+}

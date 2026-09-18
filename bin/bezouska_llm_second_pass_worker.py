@@ -1,61 +1,111 @@
 #!/usr/bin/env python3
+"""Druhý pass třídění pošty accountu bezouska.
+
+Historie (t 2026-09-18, MAILF-001/011/013/014/015):
+  - Původně to byl jen hardcoded klon heuristiky z triage — ŽÁDNÉ LLM nevolalo
+    (dokumentace o "modelovém passu" byla fikce).
+  - Teď: klasifikace je v `mail_rules.py` (single source of truth, MAILF-013),
+    INBOX se čte po stránkách (MAILF-011), a pokud heuristika nic nevybere,
+    volá se REÁLNĚ levný model (deepseek-v4-flash přes lokální LiteLLM router)
+    v přísně omezeném režimu (MAILF-001): batch po MAX_LLM_BATCH zprávách,
+    MAX_LLM_CALLS_PER_RUN volání za běh, MAX_MESSAGES_PER_RUN zpráv za běh.
+  - Z vysoko-konfidenčních LLM rozhodnutí se navrhují nová pravidla ve stavu
+    'pending' k odsouhlasení (MAILF-015) — model sám NIKDY nezapisuje aktivní
+    pravidlo.
+
+Kredity: LLM je zapnutý jen s `MAILFILTER_LLM_ENABLED=1` (default 1), dry-run
+`MAILFILTER_LLM_DRYRUN=1`. Mailbox se mění jen s `MAILFILTER_APPLY=1`.
+"""
 import json
+import os
 import sqlite3
 import subprocess
+import sys
+import urllib.request
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-ACCOUNT='bezouska'
-ROOT=Path('/root/.openclaw/workspace')
-DB_PATH=ROOT/'state'/'bezouska-llm-queue.sqlite3'
-STATE_PATH=ROOT/'state'/'bezouska-mail-triage.json'
-RUN_LOG_PATH=ROOT/'state'/'bezouska-llm-second-pass-runs.jsonl'
-REQUIRED_LABEL=None
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import mail_rules
 
-HIMALAYA_TIMEOUT_SECONDS=45
+ACCOUNT = 'bezouska'
+ROOT = Path('/root/.openclaw/workspace')
+DB_PATH = mail_rules.DB_PATH
+STATE_PATH = Path(os.environ.get('MAILFILTER_STATE_PATH2', str(ROOT / 'state' / 'bezouska-mail-triage.json')))
+RUN_LOG_PATH = Path(os.environ.get('MAILFILTER_SP_RUN_LOG', str(ROOT / 'state' / 'bezouska-llm-second-pass-runs.jsonl')))
+REQUIRED_LABEL = None
 
-NEWSLETTER_SENDERS={
-    'patrick@vibecoding.cz',
-    'hi@mail.benmeer.com',
-    'hello@carnimeal.com',
-    'newsletter@asociace.ai',
-    'bingo@patreon.com',
-    'contact@blacktailstudio.com',
-    'insidercz@substack.com',
-    'e-resident@gov.ee',
-    'team@mails.zeleznakoule.cz',
-    'novinky@software.602.cz',
-    'update@digital.metamail.com',
-    'news@quotidiano.idealista.it',
-    'hi@plaud.ai',
-    'team@mail.perplexity.ai',
-}
-PERSONAL_TRANSACTION_SENDERS={
-    'info@supertip.cz',
-    'no-reply@revolut.com',
-    'support@foreignaffairs.com',
-    'payments@comgate.cz',
-    'faktura@nordictelecom.cz',
-    'info@nordictelecom.cz',
-    'fakturace@webglobe.cz',
-    'no_reply@email.apple.com',
-    'no-reply@notify.proton.me',
-    'payments-noreply@google.com',
-    'hypotecni.zona@csobhypotecni.cz',
-}
-WORK_DOMAIN_MAP=[
-    ('@bezouska.cz', 'Folders/50_pracovni/51_bezouska', []),
-    ('@inadvisors.cz', 'Folders/50_pracovni/52_inadvisors', []),
-    ('@ipsd.cz', 'Folders/50_pracovni/53_ipsd', ['03_ipsd']),
-    ('@mmr.gov.cz', 'Folders/50_pracovni/54_mmr', []),
-    ('@prazske-noviny.cz', 'Folders/50_pracovni/70_prazske-noviny', []),
-    ('@deltaadvisory.cz', 'Folders/50_pracovni/80_delta', []),
+HIMALAYA_TIMEOUT_SECONDS = 45
+HIMALAYA_PAGE_SIZE = 500
+HIMALAYA_MAX_PAGES = 20
+
+APPLY = os.environ.get('MAILFILTER_APPLY', '0') == '1'
+LLM_ENABLED = os.environ.get('MAILFILTER_LLM_ENABLED', '1') == '1'
+LLM_DRYRUN = os.environ.get('MAILFILTER_LLM_DRYRUN', '0') == '1'
+MAX_LLM_CALLS_PER_RUN = int(os.environ.get('MAILFILTER_MAX_LLM_CALLS', '2'))
+MAX_MESSAGES_PER_RUN = int(os.environ.get('MAILFILTER_MAX_MESSAGES', '20'))
+MAX_LLM_BATCH = int(os.environ.get('MAILFILTER_LLM_BATCH', '20'))
+
+LLM_MODEL = os.environ.get('MAILFILTER_LLM_MODEL', 'deepseek/deepseek-v4-flash')
+LITELLM_BASE = os.environ.get('MAILFILTER_LITELLM_BASE', 'http://127.0.0.1:4000/v1')
+LITELLM_ENV_PATH = ROOT / 'state' / 'litellm-router' / 'litellm-router.env'
+CONFIDENCE_THRESHOLD = 0.8
+
+ALLOWED_FOLDERS = [
+    'Folders/00_marvin',
+    'Folders/10_osobni/11_tomas',
+    'Folders/10_osobni/12_andrejka',
+    'Folders/10_osobni/13_rodina',
+    'Folders/10_osobni/20_zvirata',
+    'Folders/10_osobni/31_zvole',
+    'Folders/10_osobni/32_imrychova',
+    'Folders/10_osobni/33_zahalka',
+    'Folders/10_osobni/35_italie',
+    'Folders/50_pracovni/51_bezouska',
+    'Folders/50_pracovni/52_inadvisors',
+    'Folders/50_pracovni/53_ipsd',
+    'Folders/50_pracovni/54_mmr',
+    'Folders/50_pracovni/60_domekumore',
+    'Folders/50_pracovni/70_prazske-noviny',
+    'Folders/50_pracovni/80_delta',
+    'Folders/90_ostatni/91_newsletter',
+    'Folders/90_ostatni/92_transakce',
+    'Folders/90_ostatni/93_knowhow',
+    'Folders/90_ostatni/94_notifikace',
+    'Folders/90_ostatni/95_registrace',
+    'Folders/90_ostatni/96_spammers_fun',
+    'Folders/90_ostatni/97_pozvanky',
+    'Folders/99_nezatrideno',
 ]
-KEYWORD_TRANSACTION=['billing','payment','invoice','subscription','receipt','renew','renewal','order','objednávka','objednavka','faktura','výpis z účtu','vypis z uctu','výpis k hypotéce','vypis k hypotéce','vyúčtování','vyuctovani','připomenutí výzvy','pripomenuti vyzvy','výzva k platbě','vyzva k platbe','platební výzva','platba']
-KEYWORD_ALERT=['battery','warning','alert','upozornění','upozorneni','response required','action required','needs your response','out of credits','přihlásil jste se právě','prihlasil jste se prave']
-KEYWORD_IPSD=['ipsd','eximex','indoc','veřejných zakáz','verejnych zakaz']
-KEYWORD_NEWSLETTER=['newsletter','digest','novinky','weekly','monthly','connect 2026','che succede']
-KEYWORD_DOMAIN_ADMIN=['dns','domény','domeny','domény ','registrace','prihlášení do webglobe','prihlaseni do webglobe']
+FOLDERS_PATH = ROOT / 'state' / 'mailfilter-folders.json'
+
+
+def _load_folders():
+    """Aktuální seznam složek z mailfilter-folders.json (refreshuje denní cron).
+
+    Model smí vybrat JEN existující složku; při chybě/absenci fallback na
+    statický seznam výše."""
+    try:
+        data = json.loads(FOLDERS_PATH.read_text(encoding='utf-8'))
+        folders = [f for f in data.get('folders', []) if f.count('/') >= 2]
+        if folders:
+            return folders
+    except Exception:
+        pass
+    return ALLOWED_FOLDERS
+
+
+ALLOWED_FOLDERS = _load_folders()
+
+PROMPT_TEMPLATE = (
+    "Jsi třídič pošty. Pro každý e-mail níže vyber JEDNU cílovou složku z tohoto "
+    "seznamu (přesná hodnota, nebo null pokud si nejsi jistý):\n"
+    "{folders}\n\n"
+    "Vrať POUZE JSON pole objektů [{{\"id\": <id>, \"folder\": <string|null>, "
+    "\"labels\": [<string>], \"confidence\": <0..1>}}]. Bez vysvětlování.\n\n"
+    "E-maily:\n{items}"
+)
 
 
 def now_iso():
@@ -66,141 +116,159 @@ def run(*args):
     return subprocess.check_output(list(args), text=True, timeout=HIMALAYA_TIMEOUT_SECONDS)
 
 
-def list_env(folder='INBOX', page_size='500'):
-    return json.loads(run('himalaya','envelope','list','-a',ACCOUNT,'-f',folder,'--page-size',page_size,'--output','json'))
+def list_env(folder='INBOX', page_size=None, max_pages=None):
+    """MAILF-011: projde celý mailbox po stránkách himalaya --page."""
+    page_size = int(page_size or HIMALAYA_PAGE_SIZE)
+    max_pages = int(max_pages or HIMALAYA_MAX_PAGES)
+    out = []
+    for page in range(1, max_pages + 1):
+        try:
+            batch = json.loads(run('himalaya', 'envelope', 'list', '-a', ACCOUNT, '-f', folder,
+                                   '--page-size', str(page_size), '--page', str(page),
+                                   '--output', 'json'))
+        except subprocess.CalledProcessError:
+            break
+        if not batch:
+            break
+        out.extend(batch)
+        if len(batch) < page_size:
+            break
+    return out
 
 
 def move(src, dst, mid):
-    subprocess.run(['himalaya','message','move','-a',ACCOUNT,'-f',src,dst,str(mid)], check=True, capture_output=True, text=True)
+    if not APPLY:
+        return False
+    subprocess.run(['himalaya', 'message', 'move', '-a', ACCOUNT, '-f', src, dst, str(mid)],
+                   check=True, capture_output=True, text=True)
+    return True
 
 
 def copy_to_label(src, label, mid):
-    subprocess.run(['himalaya','message','copy','-a',ACCOUNT,'-f',src,f'Labels/{label}',str(mid)], check=True, capture_output=True, text=True)
-
-
-def has_any(text, needles):
-    text=(text or '').lower()
-    return any(n in text for n in needles)
-
-
-def uniq(seq):
-    return list(dict.fromkeys(x for x in seq if x))
+    if not APPLY:
+        return False
+    subprocess.run(['himalaya', 'message', 'copy', '-a', ACCOUNT, '-f', src, f'Labels/{label}', str(mid)],
+                   check=True, capture_output=True, text=True)
+    return True
 
 
 def db_connect():
-    conn=sqlite3.connect(DB_PATH)
-    conn.row_factory=sqlite3.Row
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    mail_rules.ensure_meta(conn)
     return conn
 
 
 def queue_counts(conn):
-    counts={}
-    for status in ('needs_llm','manual_review','applied','llm_in_progress'):
-        counts[status]=conn.execute('SELECT COUNT(*) FROM queue WHERE status=?',(status,)).fetchone()[0]
-    return counts
+    return {s: conn.execute('SELECT COUNT(*) FROM queue WHERE status=?', (s,)).fetchone()[0]
+            for s in ('needs_llm', 'manual_review', 'applied', 'llm_in_progress', 'gone')}
 
 
-def learned_rule_lookup(conn, sender, recipient=None, subject=None):
-    """Nejkonkrétnější shoda plného pravidla (sender × recipient × subject_pattern).
-    FIX 2026-08-24 (t): automatika jela jen podle senderu a ignorovala subject_pattern
-    — pravidlo s předmětem se nikdy nepoužilo. Delegováno na mail_rules.learned_rule_lookup
-    (precizní > wildcard > libovolný, subject > bez subjectu, jen review_status='ok')."""
-    import mail_rules
+# ---------------------------------------------------------------------------
+# Reálné LLM volání (MAILF-001) — levný model přes lokální LiteLLM router.
+# ---------------------------------------------------------------------------
+
+def _litellm_key():
     try:
-        return mail_rules.learned_rule_lookup(conn, sender, recipient, subject, confirmed_only=True)
+        for line in LITELLM_ENV_PATH.read_text(encoding='utf-8').splitlines():
+            if line.startswith('LITELLM_MASTER_KEY='):
+                return line.split('=', 1)[1].strip()
+    except Exception:
+        pass
+    return os.environ.get('LITELLM_MASTER_KEY') or 'sk-local'
+
+
+def llm_classify(batch):
+    """batch: list of {id, subject, from}. Vrací {id: {folder, labels, confidence}}."""
+    if not LLM_ENABLED or LLM_DRYRUN:
+        return {}
+    items = '\n'.join(
+        f'- id={m["id"]} | od={m.get("from") or ""} | předmět={m.get("subject") or ""}'
+        for m in batch)
+    prompt = PROMPT_TEMPLATE.format(folders='\n'.join(ALLOWED_FOLDERS), items=items)
+    payload = json.dumps({
+        'model': LLM_MODEL,
+        'messages': [{'role': 'user', 'content': prompt}],
+        'temperature': 0,
+        'max_tokens': 1500,
+    }).encode('utf-8')
+    req = urllib.request.Request(
+        f'{LITELLM_BASE}/chat/completions', data=payload,
+        headers={'Content-Type': 'application/json',
+                 'Authorization': f'Bearer {_litellm_key()}'})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        body = json.loads(resp.read().decode('utf-8'))
+    text = body['choices'][0]['message']['content'].strip()
+    if text.startswith('```'):
+        text = text.strip('`')
+        text = text.split('\n', 1)[1] if '\n' in text else text
+    try:
+        parsed = json.loads(text)
+    except Exception:
+        return {}
+    out = {}
+    for d in parsed if isinstance(parsed, list) else []:
+        try:
+            fid = str(d.get('id'))
+            folder = d.get('folder')
+            if folder not in ALLOWED_FOLDERS:
+                folder = None
+            out[fid] = {
+                'folder': folder,
+                'labels': sanitize_labels(d.get('labels')),
+                'confidence': float(d.get('confidence') or 0),
+            }
+        except Exception:
+            continue
+    return out
+
+
+ALLOWED_LABELS = None  # labely nejsou fixní enum — sanitizují se (viz sanitize_labels)
+
+
+def sanitize_labels(raw):
+    """Uklidí labely z LLM: strip, bez '/' a kontrolních znaků, dedupe, max 40 znaků."""
+    out = []
+    for l in raw or []:
+        if not isinstance(l, str):
+            continue
+        l = l.strip().replace('/', '_')
+        if not l or len(l) > 40:
+            continue
+        if l not in out:
+            out.append(l)
+    return out
+
+
+def _alert_quota(err_text):
+    """Deterministický Telegram alert při vyčerpaném kreditu/kvótě.
+
+    Na 'Insufficient Balance' / 'insufficient_quota' / HTTP 402 se NESMÍ tiše
+    pokračovat — jinak by model pass tiše vracel prázdné výsledky."""
+    low = (err_text or '').lower()
+    if not any(k in low for k in ('insufficient balance', 'insufficient_quota',
+                                  '402', 'quota', 'credit')):
+        return False
+    try:
+        subprocess.run([sys.executable, str(ROOT / 'bin' / 'escalate.py'),
+                        '--case', 'mailfilter-llm-quota', '--severity', 'high',
+                        '--title', 'MailFilter LLM: vyčerpaný kredit/kvóta',
+                        '--detail', f'LLM second pass nemohl klasifikovat: {err_text[:300]}'],
+                       check=False, timeout=30)
+        return True
+    except Exception:
+        return False
+
+
+def propose_rule(conn, sender, folder, labels):
+    """MAILF-015: vysoko-konfidenční LLM rozhodnutí → NÁVRH pravidla k review.
+
+    Deleguje na mail_rules.propose_rule — ukládá 'pending' + active=0, takže se
+    pravidlo NIKDY neaktivuje bez odsouhlasení t ve webu."""
+    try:
+        return mail_rules.propose_rule(conn, sender, folder, labels)
     except Exception:
         return None
-
-
-def classify_folder(subj, sender):
-    if 'calendar.proton.me' in sender or sender == 'no-reply@calendar.proton.me':
-        return 'Folders/10_osobni/11_tomas', 'proton-calendar-notification'
-    if sender == 'notifications@fibaro.com' or 'fibaro' in sender:
-        return 'Folders/10_osobni/31_zvole', 'fibaro-alert'
-    if sender in NEWSLETTER_SENDERS or 'newsletter' in sender or ('bloomberg' in sender and 'news' in sender) or 'substack.com' in sender or 'convertkit' in sender or 'novinky.' in sender or 'promo' in sender:
-        return 'Folders/90_ostatni/91_newsletter', 'newsletter-signal'
-    if sender == 'news@ana-white.com':
-        return 'Folders/10_osobni/11_tomas', 'known-personal-sender'
-    if 'mojeid' in sender or sender == 'podpora@mojeid.cz' or '@bezouskova.cz' in sender:
-        if has_any(subj, KEYWORD_TRANSACTION):
-            return 'Folders/90_ostatni/92_transakce', 'personal-transaction-sender'
-        return 'Folders/10_osobni/11_tomas', 'personal-service-sender'
-    if sender in PERSONAL_TRANSACTION_SENDERS or has_any(sender, ['subscriptions_at_message_bloomberg_com_', 'gpwebpay@b2b.gpe.cz']):
-        return 'Folders/90_ostatni/92_transakce', 'known-transaction-sender'
-    if sender in {'noreply@business-updates.facebook.com', 'security@facebookmail.com'} or 'facebookmail.com' in sender or 'business-updates.facebook.com' in sender:
-        return None, 'facebook-security-or-business-alert'
-    if sender == 'podpora@nic.cz' or 'nic.cz' in sender:
-        return None, 'domain-admin-alert'
-    if 'webglobe.cz' in sender:
-        if has_any(subj, KEYWORD_TRANSACTION):
-            return 'Folders/90_ostatni/92_transakce', 'webglobe-billing'
-        return None, 'webglobe-admin-alert'
-    if sender == 'info@sparovky.eu':
-        return 'Folders/90_ostatni/91_newsletter', 'ecommerce-newsletter'
-    if '@eximex.cz' in sender or '@ipsd.cz' in sender or 'info@indoc.cz' in sender or has_any(subj, KEYWORD_IPSD):
-        return 'Folders/50_pracovni/53_ipsd', 'ipsd-signal'
-    for domain, mapped_folder, _extra_labels in WORK_DOMAIN_MAP:
-        if domain in sender:
-            return mapped_folder, f'work-domain:{domain}'
-    if '.gov.cz' in sender or '.mvcr.cz' in sender or '.mfcr.cz' in sender:
-        return None, 'gov-cz-domain'
-    if has_any(subj, KEYWORD_NEWSLETTER) or has_any(sender, ['klaviyomail.com','convertkit-mail','linkedin.com','smartemailing.cz','smartsupp.email']):
-        return 'Folders/90_ostatni/91_newsletter', 'newsletter-pattern'
-    if has_any(subj, KEYWORD_TRANSACTION):
-        return 'Folders/90_ostatni/92_transakce', 'transaction-keyword'
-    if has_any(subj, KEYWORD_DOMAIN_ADMIN):
-        return None, 'domain-admin-keyword'
-    if has_any(subj, KEYWORD_ALERT):
-        return None, 'generic-alert'
-    return None, 'fallback-low-confidence'
-
-
-def collect_labels(subj, sender):
-    proton_labels=[]
-
-    if 'calendar.proton.me' in sender or sender == 'no-reply@calendar.proton.me' or sender == 'news@ana-white.com' or 'mojeid' in sender or sender == 'podpora@mojeid.cz' or '@bezouskova.cz' in sender:
-        proton_labels += ['50_osobni']
-
-    if sender == 'notifications@fibaro.com' or 'fibaro' in sender or sender in {'noreply@business-updates.facebook.com', 'security@facebookmail.com'} or 'facebookmail.com' in sender or 'business-updates.facebook.com' in sender or sender == 'podpora@nic.cz' or 'nic.cz' in sender or has_any(subj, KEYWORD_DOMAIN_ADMIN) or has_any(subj, KEYWORD_ALERT):
-        proton_labels += ['vyresit']
-
-    if sender in NEWSLETTER_SENDERS or 'newsletter' in sender or ('bloomberg' in sender and 'news' in sender) or 'substack.com' in sender or 'convertkit' in sender or 'novinky.' in sender or 'promo' in sender or sender == 'info@sparovky.eu' or has_any(subj, KEYWORD_NEWSLETTER) or has_any(sender, ['klaviyomail.com','convertkit-mail','linkedin.com','smartemailing.cz','smartsupp.email']):
-        proton_labels += ['newsletter']
-
-    is_transaction = (
-        ('mojeid' in sender or sender == 'podpora@mojeid.cz' or '@bezouskova.cz' in sender) and has_any(subj, KEYWORD_TRANSACTION)
-    ) or sender in PERSONAL_TRANSACTION_SENDERS or has_any(sender, ['subscriptions_at_message_bloomberg_com_', 'gpwebpay@b2b.gpe.cz']) or has_any(subj, KEYWORD_TRANSACTION)
-    if is_transaction:
-        proton_labels += ['faktury', '00_platby']
-
-    if 'hypotecni.zona@csobhypotecni.cz' in sender or 'rb.cz' in sender or 'airbank.cz' in sender:
-        proton_labels += ['finance']
-
-    if '@eximex.cz' in sender or '@ipsd.cz' in sender or 'info@indoc.cz' in sender or has_any(subj, KEYWORD_IPSD):
-        proton_labels += ['03_ipsd']
-        if has_any(subj, ['žádost', 'zadost', 'chybějící', 'chybejici']):
-            proton_labels += ['vyresit']
-
-    for domain, _mapped_folder, extra_labels in WORK_DOMAIN_MAP:
-        if domain in sender:
-            proton_labels += extra_labels
-            break
-
-    return uniq(proton_labels)
-
-
-def classify_pending(conn, subject, sender, recipient=None):
-    subj=(subject or '').lower()
-    sender=(sender or '').lower()
-
-    learned=learned_rule_lookup(conn, sender, recipient, subj)
-    folder, reason = classify_folder(subj, sender)
-    proton_labels = collect_labels(subj, sender)
-    if learned is not None:
-        folder = learned.get('folder') or folder
-        proton_labels = uniq(proton_labels + learned.get('proton_labels', []))
-        reason = learned.get('reason') or reason
-    return {'folder':folder,'proton_labels':proton_labels,'reason':reason,'confidence':0.9 if learned is not None else 0.7}
 
 
 def load_state():
@@ -210,8 +278,8 @@ def load_state():
 
 
 def save_state(summary):
-    state=load_state()
-    state['llm_second_pass']=summary
+    state = load_state()
+    state['llm_second_pass'] = summary
     STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
 
 
@@ -221,22 +289,32 @@ def append_run_log(summary):
         f.write(json.dumps(summary, ensure_ascii=False) + '\n')
 
 
-def main():
-    conn=db_connect()
-    pending=conn.execute("select id, subject, sender, message_id, attempts from queue where status='needs_llm' order by updated_at asc, id asc").fetchall()
+def recipient_of(msg):
+    to_list = msg.get('to') or []
+    if isinstance(to_list, list) and to_list:
+        first = to_list[0]
+        return ((first.get('addr') if isinstance(first, dict) else str(first)) or '').lower()
+    if isinstance(to_list, dict):
+        return (to_list.get('addr') or '').lower()
+    return ''
 
-    if not pending:
-        summary={
+
+def main():
+    conn = db_connect()
+    pending = conn.execute(
+        "select id, subject, sender, message_id, attempts from queue "
+        "where status='needs_llm' order by updated_at asc, id asc limit ?",
+        (MAX_MESSAGES_PER_RUN,)).fetchall()
+    manual_review_n = conn.execute(
+        "select count(*) from queue where status='manual_review'").fetchone()[0]
+
+    if not pending and manual_review_n == 0:
+        summary = {
             'timestamp': now_iso(),
-            'pending_before': 0,
-            'applied_count': 0,
-            'failed_count': 0,
-            'skipped_count': 0,
-            'applied': [],
-            'failed': [],
-            'skipped': [],
-            'queue_counts': queue_counts(conn),
-            'inbox_remaining': None,
+            'pending_before': 0, 'applied_count': 0, 'failed_count': 0,
+            'skipped_count': 0, 'llm_calls': 0, 'proposed_rules': 0,
+            'applied': [], 'failed': [], 'skipped': [],
+            'queue_counts': queue_counts(conn), 'inbox_remaining': None,
             'note': 'queue empty; skipped IMAP fetch',
         }
         conn.close()
@@ -245,76 +323,154 @@ def main():
         print(json.dumps(summary, ensure_ascii=False))
         return
 
-    inbox_by_id={str(m['id']): m for m in list_env('INBOX')}
+    try:
+        inbox = list_env('INBOX')
+    except Exception as e:
+        summary = {
+            'timestamp': now_iso(), 'pending_before': len(pending),
+            'error': f'inbox read failed: {e}', 'queue_counts': queue_counts(conn),
+        }
+        conn.close()
+        save_state(summary)
+        append_run_log(summary)
+        print(json.dumps(summary, ensure_ascii=False))
+        raise SystemExit(1)
 
-    applied=[]
-    failed=[]
-    skipped=[]
+    inbox_by_id = {str(m['id']): m for m in inbox}
 
+    # 1) deterministická/rule-based klasifikace (mail_rules — single source of truth)
+    decisions = {}
+    unresolved = []
     for row in pending:
-        local_id=str(row['id'])
-        msg=inbox_by_id.get(local_id)
+        local_id = str(row['id'])
+        msg = inbox_by_id.get(local_id)
         if msg is None:
-            conn.execute("update queue set status='manual_review', attempts=attempts+1, last_error=?, locked_at=NULL, updated_at=? where id=?", ('message not found in INBOX', now_iso(), local_id))
-            failed.append({'id': local_id, 'message_id': row['message_id'], 'error': 'message not found in INBOX', 'status': 'manual_review'})
+            # MAILF-012: zpráva už v INBOX není → terminální stav 'gone', ne zombie
+            conn.execute("update queue set status='gone', attempts=attempts+1, last_error=?, "
+                         "locked_at=NULL, updated_at=? where id=?",
+                         ('message not found in INBOX', now_iso(), local_id))
             continue
+        dec = mail_rules.classify_message(
+            conn, subject=row['subject'], sender=row['sender'],
+            recipient=recipient_of(msg), confirmed_only=True)
+        if dec['folder'] is None and LLM_ENABLED:
+            unresolved.append((local_id, row, msg, dec))
+        else:
+            decisions[local_id] = dec
+    conn.commit()
 
-        # recipient z envelope (pro plný match pravidel — sender+recipient+subject, t 2026-08-24)
-        to_list = msg.get('to') or []
-        recipient = ''
-        if isinstance(to_list, list) and to_list:
-            first = to_list[0]
-            recipient = ((first.get('addr') if isinstance(first, dict) else str(first)) or '').lower()
-        elif isinstance(to_list, dict):
-            recipient = (to_list.get('addr') or '').lower()
-        decision=classify_pending(conn, row['subject'], row['sender'], recipient)
+    # 2) LLM dořešení nezařezených (bounded: batch + max calls)
+    llm_calls = 0
+    proposed = 0
+    llm_meta = {}
+    for i in range(0, len(unresolved), MAX_LLM_BATCH):
+        if llm_calls >= MAX_LLM_CALLS_PER_RUN:
+            break
+        chunk = unresolved[i:i + MAX_LLM_BATCH]
+        batch = [{'id': c[0], 'subject': c[2].get('subject'), 'from': (c[2].get('from') or {}).get('addr')}
+                 for c in chunk]
         try:
-            labels = list(dict.fromkeys(decision['proton_labels']))
+            llm_calls += 1
+            results = llm_classify(batch)
+        except Exception as e:
+            results = {}
+            llm_meta['last_error'] = str(e)[:200]
+            if _alert_quota(str(e)):
+                llm_meta['quota_alert'] = True
+            break
+        for local_id, row, msg, dec in chunk:
+            r = results.get(local_id) or {}
+            if r.get('folder') and r.get('confidence', 0) >= CONFIDENCE_THRESHOLD:
+                dec = dict(dec)
+                dec['folder'] = r['folder']
+                dec['reason'] = 'llm-second-pass'
+                dec['proton_labels'] = mail_rules.uniq(dec.get('proton_labels', []) + r.get('labels', []))
+                dec['confidence'] = r['confidence']
+                dec['llm'] = True
+                # MAILF-015: návrh pravidla (pending review)
+                if propose_rule(conn, row['sender'], r['folder'], r.get('labels', [])):
+                    proposed += 1
+            else:
+                dec = dict(dec)
+                dec['confidence'] = 0.7
+                dec['reason'] = dec.get('reason') or 'fallback-low-confidence'
+            decisions[local_id] = dec
+
+    # 3) aplikace rozhodnutí
+    applied, failed, skipped = [], [], []
+    model_version = mail_rules.get_model_version(conn)
+    for row in pending:
+        local_id = str(row['id'])
+        if local_id not in decisions:
+            continue
+        dec = decisions[local_id]
+        labels = list(dict.fromkeys(dec.get('proton_labels', [])))
+        try:
             for label in labels:
                 copy_to_label('INBOX', label, local_id)
-            if decision['folder'] is None:
-                # t (2026-09-01): žádné pravidlo → mail zůstává v INBOX BEZ automatického labelu vyresit;
-                # labely aplikované výše jsou jen ty, které rozhodnutí přiřadilo explicitně
-                payload={
-                    'id': local_id,
-                    'message_id': row['message_id'],
-                    'folder': 'INBOX',
-                    'labels': labels,
-                    'reason': decision['reason'],
-                    'confidence': decision['confidence'],
-                    'note': 'no rule match — zůstává v INBOX',
-                }
+            if dec.get('folder') is None:
+                payload = {'id': local_id, 'message_id': row['message_id'], 'folder': 'INBOX',
+                           'labels': labels, 'reason': dec.get('reason'),
+                           'confidence': dec.get('confidence', 0.7),
+                           'model_version': model_version,
+                           'note': 'no rule match — zůstává v INBOX'}
             else:
-                move('INBOX', decision['folder'], local_id)
-                payload={
-                    'id': local_id,
-                    'message_id': row['message_id'],
-                    'folder': decision['folder'],
-                    'labels': labels,
-                    'reason': decision['reason'],
-                    'confidence': decision['confidence'],
-                }
-            conn.execute("update queue set status='applied', decision_json=?, applied_at=?, locked_at=NULL, last_error=NULL, updated_at=? where id=?", (json.dumps(payload, ensure_ascii=False), now_iso(), now_iso(), local_id))
+                move('INBOX', dec['folder'], local_id)
+                payload = {'id': local_id, 'message_id': row['message_id'], 'folder': dec['folder'],
+                           'labels': labels, 'reason': dec.get('reason'),
+                           'confidence': dec.get('confidence', 0.7),
+                           'model_version': model_version}
+            conn.execute("update queue set status='applied', decision_json=?, applied_at=?, "
+                         "locked_at=NULL, last_error=NULL, updated_at=? where id=?",
+                         (json.dumps(payload, ensure_ascii=False), now_iso(), now_iso(), local_id))
             applied.append(payload)
         except Exception as e:
-            attempts=(row['attempts'] or 0) + 1
-            new_status='manual_review' if attempts >= 3 else 'needs_llm'
-            conn.execute("update queue set status=?, attempts=?, last_error=?, locked_at=NULL, updated_at=? where id=?", (new_status, attempts, str(e), now_iso(), local_id))
+            attempts = (row['attempts'] or 0) + 1
+            new_status = 'manual_review' if attempts >= 3 else 'needs_llm'
+            conn.execute("update queue set status=?, attempts=?, last_error=?, locked_at=NULL, "
+                         "updated_at=? where id=?", (new_status, attempts, str(e), now_iso(), local_id))
             failed.append({'id': local_id, 'message_id': row['message_id'], 'error': str(e), 'status': new_status})
 
     conn.commit()
-    summary={
+
+    # MAILF-012: rekonciliace zombie 'manual_review' záznamů (bounded).
+    # Záznam, jehož zpráva už v INBOX není, se označí terminálně 'gone';
+    # záznam, jehož zpráva se vrátila, se vrátí do fronty.
+    reconciled = {'gone': 0, 'requeued': 0}
+    for row in conn.execute(
+            "select id from queue where status='manual_review' limit 200").fetchall():
+        local_id = str(row['id'])
+        if local_id in inbox_by_id:
+            conn.execute("update queue set status='needs_llm', locked_at=NULL, updated_at=? "
+                         "where id=?", (now_iso(), local_id))
+            reconciled['requeued'] += 1
+        else:
+            conn.execute("update queue set status='gone', locked_at=NULL, updated_at=? "
+                         "where id=?", (now_iso(), local_id))
+            reconciled['gone'] += 1
+    conn.commit()
+
+    summary = {
         'timestamp': now_iso(),
         'pending_before': len(pending),
         'applied_count': len(applied),
         'failed_count': len(failed),
         'skipped_count': len(skipped),
+        'llm_calls': llm_calls,
+        'llm_enabled': LLM_ENABLED,
+        'llm_dryrun': LLM_DRYRUN,
+        'apply': APPLY,
+        'proposed_rules': proposed,
         'applied': applied,
         'failed': failed,
         'skipped': skipped,
         'queue_counts': queue_counts(conn),
-        'inbox_remaining': len(list_env('INBOX')),
+        'reconciled': reconciled,
+        'inbox_remaining': len(inbox),
+        'model_version': model_version,
     }
+    if llm_meta:
+        summary['llm_meta'] = llm_meta
     conn.close()
     save_state(summary)
     append_run_log(summary)

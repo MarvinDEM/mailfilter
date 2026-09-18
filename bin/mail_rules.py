@@ -189,6 +189,7 @@ def upsert_learned_rule(conn, sender, folder, proton_labels, source,
         conn.execute('UPDATE learned_rules SET hits=hits+1, learned_at=? WHERE id=?',
                      (__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(), row['id']))
         conn.commit()
+        bump_model_version(conn)
         return 'bumped'
 
     # sender už má obecné pravidlo na jinou složku → konflikt → subject-scoped
@@ -205,6 +206,7 @@ def upsert_learned_rule(conn, sender, folder, proton_labels, source,
                  __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
                  notes or 'subject-scoped (sender conflict)'))
             conn.commit()
+            bump_model_version(conn)
             return 'conflict-subject-rule'
 
     conn.execute(
@@ -214,6 +216,7 @@ def upsert_learned_rule(conn, sender, folder, proton_labels, source,
          __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
          notes or None))
     conn.commit()
+    bump_model_version(conn)
     return 'inserted'
 
 
@@ -256,6 +259,7 @@ def set_review(conn, rule_id, status):
     else:
         conn.execute("UPDATE learned_rules SET review_status='ok', active=1 WHERE id=?", (rule_id,))
     conn.commit()
+    bump_model_version(conn)
     return conn.total_changes > 0
 
 
@@ -324,6 +328,7 @@ def update_rule(conn, rule_id, fields):
     params.append(rule_id)
     conn.execute(f'UPDATE learned_rules SET {", ".join(sets)} WHERE id=?', params)
     conn.commit()
+    bump_model_version(conn)
     return True
 
 
@@ -359,6 +364,7 @@ def create_rule(conn, fields):
          'manual-web', datetime.now(timezone.utc).isoformat(),
          'vytvořeno v mailfilter webu', forward_to))
     conn.commit()
+    bump_model_version(conn)
     return cur.lastrowid
 
 
@@ -399,6 +405,181 @@ def export_rules_md(conn):
     RULES_PATH.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
+# ---------------------------------------------------------------------------
+# Sdílená klasifikační heuristika (single source of truth, MAILF-013, t 2026-09-18)
+# ---------------------------------------------------------------------------
+# Dřív byla logika ZKOPÍROVANÁ v triage_bezouska_mail.py i v
+# bezouska_llm_second_pass_worker.py → drift (jednou už způsobil bug).
+# Teď je kanonicky tady; oba passy volají classify_message().
+
+NEWSLETTER_SENDERS = {
+    'newsletter@asociace.ai',
+    'magazin@egovernment.cz',
+    'bingo@patreon.com',
+    'contact@blacktailstudio.com',
+    'insidercz@substack.com',
+    'e-resident@gov.ee',
+    'team@mails.zeleznakoule.cz',
+    'novinky@software.602.cz',
+    'update@digital.metamail.com',
+    'news@quotidiano.idealista.it',
+    'hi@plaud.ai',
+    'team@mail.perplexity.ai',
+}
+PERSONAL_TRANSACTION_SENDERS = {
+    'no-reply@revolut.com',
+    'support@foreignaffairs.com',
+    'payments@comgate.cz',
+    'faktura@nordictelecom.cz',
+    'info@nordictelecom.cz',
+    'fakturace@webglobe.cz',
+    'no_reply@email.apple.com',
+    'no-reply@notify.proton.me',
+    'payments-noreply@google.com',
+    'hypotecni.zona@csobhypotecni.cz',
+}
+WORK_DOMAIN_MAP = [
+    ('@bezouska.cz', 'Folders/50_pracovni/51_bezouska', []),
+    ('@inadvisors.cz', 'Folders/50_pracovni/52_inadvisors', []),
+    ('@ipsd.cz', 'Folders/50_pracovni/53_ipsd', ['03_ipsd']),
+    ('@mmr.gov.cz', 'Folders/50_pracovni/54_mmr', []),
+    ('@prazske-noviny.cz', 'Folders/50_pracovni/70_prazske-noviny', []),
+    ('@deltaadvisory.cz', 'Folders/50_pracovni/80_delta', []),
+]
+KEYWORD_TRANSACTION = ['billing', 'payment', 'invoice', 'subscription', 'receipt', 'renew', 'renewal', 'order', 'objednávka', 'objednavka', 'faktura', 'výpis z účtu', 'vypis z uctu', 'výpis k hypotéce', 'vypis k hypotéce', 'vyúčtování', 'vyuctovani', 'připomenutí výzvy', 'pripomenuti vyzvy', 'výzva k platbě', 'vyzva k platbe', 'platební výzva']
+KEYWORD_ALERT = ['battery', 'warning', 'alert', 'upozornění', 'upozorneni', 'action required', 'needs your response', 'out of credits', 'přihlásil jste se právě', 'prihlasil jste se prave']
+KEYWORD_IPSD = ['ipsd', 'eximex', 'indoc', 'veřejných zakáz', 'verejnych zakaz']
+KEYWORD_NEWSLETTER = ['newsletter', 'digest', 'novinky', 'weekly', 'monthly', 'connect 2026', 'che succede']
+KEYWORD_DOMAIN_ADMIN = ['dns', 'domény', 'domeny', 'domény ', 'registrace', 'prihlášení do webglobe', 'prihlaseni do webglobe']
+
+
+def has_any(text, needles):
+    text = (text or '').lower()
+    return any(n in text for n in needles)
+
+
+def uniq(seq):
+    return list(dict.fromkeys(x for x in seq if x))
+
+
+def classify_folder(subj, sender):
+    """Deterministická heuristika: (subject, sender) -> (folder|None, reason).
+    Kanonická verze (původně z triage_bezouska_mail.py, reason 'newsletter-sender')."""
+    if 'calendar.proton.me' in sender or sender == 'no-reply@calendar.proton.me':
+        return 'Folders/10_osobni/11_tomas', 'proton-calendar-notification'
+    if sender == 'notifications@fibaro.com' or 'fibaro' in sender:
+        return 'Folders/10_osobni/31_zvole', 'fibaro-alert'
+    if sender in NEWSLETTER_SENDERS or 'newsletter' in sender or ('bloomberg' in sender and 'news' in sender) or 'substack.com' in sender or 'convertkit' in sender or 'novinky.' in sender or 'promo' in sender:
+        return 'Folders/90_ostatni/91_newsletter', 'newsletter-sender'
+    if sender == 'news@ana-white.com':
+        return 'Folders/10_osobni/11_tomas', 'known-personal-sender'
+    if 'mojeid' in sender or sender == 'podpora@mojeid.cz' or '@bezouskova.cz' in sender:
+        if has_any(subj, KEYWORD_TRANSACTION):
+            return 'Folders/90_ostatni/92_transakce', 'personal-transaction-sender'
+        return 'Folders/10_osobni/11_tomas', 'personal-service-sender'
+    if sender in PERSONAL_TRANSACTION_SENDERS or has_any(sender, ['subscriptions_at_message_bloomberg_com_', 'gpwebpay@b2b.gpe.cz']):
+        return 'Folders/90_ostatni/92_transakce', 'known-transaction-sender'
+    if sender in {'noreply@business-updates.facebook.com', 'security@facebookmail.com'} or 'facebookmail.com' in sender or 'business-updates.facebook.com' in sender:
+        return None, 'facebook-security-or-business-alert'
+    if sender == 'podpora@nic.cz' or 'nic.cz' in sender:
+        return None, 'domain-admin-alert'
+    if 'webglobe.cz' in sender:
+        if has_any(subj, KEYWORD_TRANSACTION):
+            return 'Folders/90_ostatni/92_transakce', 'webglobe-billing'
+        return None, 'webglobe-admin-alert'
+    if sender == 'info@sparovky.eu':
+        return 'Folders/90_ostatni/91_newsletter', 'ecommerce-newsletter'
+    if '@eximex.cz' in sender or '@ipsd.cz' in sender or has_any(sender, ['info@indoc.cz']) or has_any(subj, KEYWORD_IPSD):
+        return 'Folders/50_pracovni/53_ipsd', 'ipsd-signal'
+    for domain, mapped_folder, _extra_labels in WORK_DOMAIN_MAP:
+        if domain in sender:
+            return mapped_folder, f'work-domain:{domain}'
+    if '.gov.cz' in sender or '.mvcr.cz' in sender or '.mfcr.cz' in sender:
+        return None, 'gov-cz-domain'
+    if has_any(subj, KEYWORD_NEWSLETTER) or has_any(sender, ['klaviyomail.com', 'convertkit-mail', 'linkedin.com', 'smartemailing.cz', 'smartsupp.email']):
+        return 'Folders/90_ostatni/91_newsletter', 'newsletter-pattern'
+    if has_any(subj, KEYWORD_TRANSACTION):
+        return 'Folders/90_ostatni/92_transakce', 'transaction-keyword'
+    if has_any(subj, KEYWORD_DOMAIN_ADMIN):
+        return None, 'domain-admin-keyword'
+    if has_any(subj, KEYWORD_ALERT):
+        return None, 'generic-alert'
+    return None, 'fallback-unclassified'
+
+
+def collect_labels(subj, sender):
+    """-> (semantic_labels, proton_labels). Kanonická verze (z triage)."""
+    semantic = []
+    proton_labels = []
+
+    if 'calendar.proton.me' in sender or sender == 'no-reply@calendar.proton.me' or sender == 'news@ana-white.com' or 'mojeid' in sender or sender == 'podpora@mojeid.cz' or '@bezouskova.cz' in sender:
+        semantic += ['personal']
+        proton_labels += ['50_osobni']
+
+    if sender == 'notifications@fibaro.com' or 'fibaro' in sender or sender in {'noreply@business-updates.facebook.com', 'security@facebookmail.com'} or 'facebookmail.com' in sender or 'business-updates.facebook.com' in sender or sender == 'podpora@nic.cz' or 'nic.cz' in sender or has_any(subj, KEYWORD_DOMAIN_ADMIN) or has_any(subj, KEYWORD_ALERT):
+        semantic += ['alerts', '00_vyresit']
+        proton_labels += ['vyresit']
+
+    if sender in NEWSLETTER_SENDERS or 'newsletter' in sender or ('bloomberg' in sender and 'news' in sender) or 'substack.com' in sender or 'convertkit' in sender or 'novinky.' in sender or 'promo' in sender or sender == 'info@sparovky.eu' or has_any(subj, KEYWORD_NEWSLETTER) or has_any(sender, ['klaviyomail.com', 'convertkit-mail', 'linkedin.com', 'smartemailing.cz', 'smartsupp.email']):
+        semantic += ['newsletters']
+        proton_labels += ['newsletter']
+
+    is_transaction = (
+        ('mojeid' in sender or sender == 'podpora@mojeid.cz' or '@bezouskova.cz' in sender) and has_any(subj, KEYWORD_TRANSACTION)
+    ) or sender in PERSONAL_TRANSACTION_SENDERS or has_any(sender, ['subscriptions_at_message_bloomberg_com_', 'gpwebpay@b2b.gpe.cz']) or has_any(subj, KEYWORD_TRANSACTION)
+    if is_transaction:
+        semantic += ['transactions']
+        proton_labels += ['faktury', '00_platby']
+
+    if 'hypotecni.zona@csobhypotecni.cz' in sender or 'rb.cz' in sender or 'airbank.cz' in sender:
+        semantic += ['finance']
+        proton_labels += ['finance']
+
+    if '@eximex.cz' in sender or '@ipsd.cz' in sender or has_any(sender, ['info@indoc.cz']) or has_any(subj, KEYWORD_IPSD):
+        semantic += ['work']
+        proton_labels += ['03_ipsd']
+        if has_any(subj, ['žádost', 'zadost', 'chybějící', 'chybejici']):
+            semantic += ['00_vyresit']
+            proton_labels += ['vyresit']
+
+    for domain, _mapped_folder, extra_labels in WORK_DOMAIN_MAP:
+        if domain in sender:
+            semantic += ['work']
+            proton_labels += extra_labels
+            break
+
+    if '.gov.cz' in sender or '.mvcr.cz' in sender or '.mfcr.cz' in sender:
+        semantic += ['work']
+
+    return uniq(semantic), uniq(proton_labels)
+
+
+def classify_message(conn, *, subject, sender, recipient=None, confirmed_only=True):
+    """Jednotné rozhodnutí pro oba passy (MAILF-013/014, t 2026-09-18).
+
+    Pořadí: learned pravidlo (nejkonkrétnější) přebije heuristiku; heuristika
+    doplňuje labely. confirmed_only=True → ber jen pravidla review_status='ok'
+    (pending pravidla se aplikují až po schválení v revizi — jednotná politika).
+    """
+    subj = (subject or '').lower()
+    sender = (sender or '').lower()
+    learned = learned_rule_lookup(conn, sender, recipient, subj, confirmed_only=confirmed_only)
+    folder, folder_reason = classify_folder(subj, sender)
+    semantic, proton_labels = collect_labels(subj, sender)
+    reason = folder_reason
+    if learned is not None:
+        folder = learned.get('folder') or folder
+        proton_labels = uniq(proton_labels + learned.get('proton_labels', []))
+        semantic = uniq(semantic + learned.get('semantic_labels', []))
+        reason = learned.get('reason') or reason
+    return {
+        'semantic_labels': semantic,
+        'proton_labels': proton_labels,
+        'folder': folder,
+        'reason': reason,
+    }
+
+
 def seed_datovka_rules(conn):
     """Manuální pravidla pro datovou schránku (t, 2026-08-12). Idempotentní."""
     from datetime import datetime, timezone
@@ -419,6 +600,68 @@ def seed_datovka_rules(conn):
                 (sender, rec, pat, folder, '[]', source, now, 'datová schránka — subjekt v předmětu'))
     conn.commit()
     export_rules_md(conn)
+
+
+# ---------------------------------------------------------------------------
+# Verze klasifikačního modelu (MAILF-010, t 2026-09-18)
+# ---------------------------------------------------------------------------
+# Triaging znovu zanořuje no-op 'applied' maily (rozhodnutí folder==INBOX)
+# jen když se verze změní — tj. když vznikne/změní se pravidlo. Bez gate by
+# se 600+ no-op záznamů re-queue-ovalo každých 15 min (churn).
+
+def _ensure_meta(conn):
+    conn.execute('CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)')
+
+
+def ensure_meta(conn):
+    """Veřejná varianta pro volající moduly (idempotentní)."""
+    _ensure_meta(conn)
+
+
+def propose_rule(conn, sender, folder, proton_labels, source='llm-second-pass', notes=None):
+    """MAILF-015: založí NÁVRH pravidla (review_status='pending', active=0).
+
+    Model nikdy nezapisuje aktivní pravidlo — t ho musí odsouhlasit ve webu.
+    Idempotentní: stejná (sender, folder) pending už existuje → nic nového.
+    """
+    sender = (sender or '').lower()
+    if not sender or not folder:
+        return None
+    row = conn.execute(
+        "SELECT id FROM learned_rules WHERE sender=? AND folder=? AND subject_pattern IS NULL "
+        "AND review_status='pending' LIMIT 1", (sender, folder)).fetchone()
+    if row:
+        return None
+    cur = conn.execute(
+        '''INSERT INTO learned_rules (sender, recipient, subject_pattern, folder, labels_json,
+                                     source, learned_at, hits, notes, review_status, active)
+           VALUES (?, NULL, NULL, ?, ?, ?, ?, 1, ?, 'pending', 0)''',
+        (sender, folder, json.dumps(proton_labels or [], ensure_ascii=False), source,
+         __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
+         notes or 'LLM second pass — čeká na odsouhlasení'))
+    conn.commit()
+    bump_model_version(conn)
+    return cur.lastrowid
+
+
+def get_model_version(conn):
+    _ensure_meta(conn)
+    row = conn.execute("SELECT value FROM meta WHERE key='model_version'").fetchone()
+    try:
+        return int(row['value']) if row else 0
+    except Exception:
+        return 0
+
+
+def bump_model_version(conn):
+    """Zvýší verzi klasifikačního modelu. Voláno při každé změně sady pravidel."""
+    _ensure_meta(conn)
+    cur = get_model_version(conn)
+    new = cur + 1
+    conn.execute("INSERT INTO meta(key,value) VALUES('model_version',?) "
+                 "ON CONFLICT(key) DO UPDATE SET value=excluded.value", (str(new),))
+    conn.commit()
+    return new
 
 
 if __name__ == '__main__':
