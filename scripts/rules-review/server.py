@@ -427,6 +427,25 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send(500, json.dumps({'error': str(e)}).encode('utf-8'))
             return
+        if path == '/api/rules/delete':
+            # MAILF-020 (t 2026-09-18): hromadné TRVALÉ smazání zahozených pravidel.
+            # Povoleno jen pro review_status='discard' (nejdřív zahodit, pak smazat).
+            if not _auth_required(self):
+                return
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                data = json.loads(self.rfile.read(length) or b'{}')
+                ids = data.get('ids') or []
+                if not isinstance(ids, list) or not ids:
+                    self._send(400, json.dumps({'error': 'ids musí být neprázdné pole'}).encode('utf-8'))
+                    return
+                conn = mail_rules.db_connect()
+                deleted = mail_rules.delete_rules(conn, ids)
+                conn.close()
+                self._send(200, json.dumps({'ok': True, 'deleted': deleted}).encode('utf-8'))
+            except Exception as e:
+                self._send(500, json.dumps({'error': str(e)}).encode('utf-8'))
+            return
         if path == '/api/rules':
             # POST /api/rules — nový filtr (t, 2026-08-23)
             if not _auth_required(self):

@@ -87,7 +87,7 @@
 </head>
 <body>
   <h1>📬 Revize pravidel třídění pošty (bezouska)</h1>
-  <div class="sub">Kritérium (odesílatel × příjemce × předmět) → složka + labely. „Zahodit“ = pravidlo se přestane používat (soft-delete, jde vrátit).</div>
+  <div class="sub">Kritérium (odesílatel × příjemce × předmět) → složka + labely. „Zahodit“ = pravidlo se přestane používat (soft-delete, jde vrátit). V pohledu „Zahozené“ lze vybraná pravidla trvale smazat ze systému.</div>
 
   <div class="stats" id="stats"></div>
 
@@ -127,7 +127,7 @@
   </div>
 
 <script>
-const state = { rules: [], filter: 'all', sort: { key: 'criterion', dir: 1 }, running: null, _pollTimer: null, _waiting: null, inboxRunning: false, inboxRun: null, _inboxWaiting: null };
+const state = { rules: [], filter: 'all', sort: { key: 'criterion', dir: 1 }, running: null, _pollTimer: null, _waiting: null, inboxRunning: false, inboxRun: null, _inboxWaiting: null, selected: new Set() };
 const TOKEN_KEY = 'mailfilter_token';
 let token = localStorage.getItem(TOKEN_KEY) || null;
 
@@ -211,10 +211,43 @@ function renderStats() {
     `<button class="refresh logout" onclick="logout()">⎋ Odhlásit</button>`;
   document.getElementById('tabs').innerHTML =
     [['all','Vše'],['pending','K revizi'],['ok','V pořádku'],['discard','Zahozené']]
-      .map(([k, label]) => `<button class="tab ${state.filter===k?'active':''}" onclick="setFilter('${k}')">${label} (${s[k]})</button>`).join('');
+      .map(([k, label]) => `<button class="tab ${state.filter===k?'active':''}" onclick="setFilter('${k}')">${label} (${s[k]})</button>`).join('') +
+    (state.filter === 'discard'
+      ? `<button class="tab" id="bulk-del" style="border-color:var(--red);color:var(--red);margin-left:auto" onclick="bulkDeleteDiscarded()">🗑 Trvale smazat vybraná (<span id="bulk-count">0</span>)</button>`
+      : '');
+  updateBulkCount();
 }
 
-function setFilter(f) { state.filter = f; render(); }
+function updateBulkCount() {
+  const el = document.getElementById('bulk-count');
+  if (el) el.textContent = String(state.selected.size);
+}
+
+function setFilter(f) { if (f !== state.filter) state.selected.clear(); state.filter = f; render(); }
+
+function toggleSelect(id, on) {
+  if (on) state.selected.add(id); else state.selected.delete(id);
+  updateBulkCount();
+}
+
+function toggleSelectAll(on) {
+  if (on) { for (const r of state.rules) if (r.review_status === 'discard') state.selected.add(r.id); }
+  else state.selected.clear();
+  render();
+}
+
+async function bulkDeleteDiscarded() {
+  const ids = [...state.selected];
+  if (!ids.length) { toast('Nic není vybráno'); return; }
+  if (!confirm('TRVALE smazat ' + ids.length + ' zahozených pravidel ze systému? Tuto akci nelze vrátit.')) return;
+  const r = await api('/api/rules/delete', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ ids })
+  });
+  if (r.ok) { state.selected.clear(); await load(); toast('Smazáno ' + r.deleted + ' pravidel'); }
+  else toast('Chyba: ' + (r.error || '?'));
+}
 
 function criterionHTML(r) {
   let h = r.sender
@@ -254,6 +287,7 @@ function rowHTML(r) {
                <button class="disc" onclick="review(${r.id},'discard')">🗑</button>`;
   }
   return `<tr class="${r.review_status==='discard'?'discarded':''}">
+    ${state.filter === 'discard' ? `<td style="width:28px"><input type="checkbox" ${state.selected.has(r.id)?'checked':''} onchange="toggleSelect(${r.id}, this.checked)"></td>` : ''}
     <td><span class="chip id" title="ID pravidla — klik pro kopírování" onclick="copyId(${r.id})">#${r.id}</span></td>
     <td class="criterion">${criterionHTML(r)}</td>
     <td><span class="chip folder">${esc(r.folder)}</span>${r.forward_to ? ` <span class="chip" title="Přeposlat na" style="border-color:var(--accent)">⇢ ${esc(r.forward_to)}</span>` : ''}</td>
@@ -281,7 +315,10 @@ function render() {
     ['last_run', 'Poslední běh'],
     ['', ''],
   ];
+  const showSel = state.filter === 'discard';
+  if (showSel) cols.unshift(['sel', '']);
   const th = cols.map(([k, label]) => {
+    if (k === 'sel') return `<th style="width:28px"><input type="checkbox" title="Vybrat vše" onchange="toggleSelectAll(this.checked)"></th>`;
     if (!k) return '<th></th>';
     const arrow = state.sort.key === k ? (state.sort.dir === 1 ? ' ▲' : ' ▼') : '';
     return `<th class="sortable" onclick="setSort('${k}')">${label}${arrow}</th>`;
@@ -378,6 +415,9 @@ async function load() {
   if (!token) { showLogin(); return; }
   const d = await api('/api/rules');
   state.rules = d.rules || [];
+  // prunuj výběr na stále existující zahozená pravidla (MAILF-020)
+  const discardIds = new Set((state.rules || []).filter(r => r.review_status === 'discard').map(r => r.id));
+  for (const id of [...state.selected]) if (!discardIds.has(id)) state.selected.delete(id);
   state.running = d.running != null ? d.running : (state._waiting ? state._waiting.id : null);
   if (state._waiting) {
     const rule = (state.rules || []).find(x => x.id === state._waiting.id);

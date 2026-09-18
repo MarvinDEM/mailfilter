@@ -209,6 +209,29 @@ def main():
             ok = False
         check('E2) rule-proposals vrací strukturovaný návrh', ok, p.stdout[:200])
 
+        # H) MAILF-020 — hromadné TRVALÉ smazání zahozených pravidel (t 2026-09-18)
+        _mr = mail_rules  # importován výše (B3), DB_PATH = temp smoke DB
+        hconn = _mr.db_connect()
+        keep_id = _mr.create_rule(hconn, {'sender': 'smoke-keep@example.invalid',
+                                          'folder': 'Folders/99_nezatrideno'})
+        del_id = _mr.create_rule(hconn, {'sender': 'smoke-del@example.invalid',
+                                         'folder': 'Folders/99_nezatrideno'})
+        _mr.set_review(hconn, del_id, 'discard')
+        n = _mr.delete_rules(hconn, [keep_id, del_id])
+        keep_there = hconn.execute("SELECT count(*) FROM learned_rules WHERE id=?", (keep_id,)).fetchone()[0]
+        del_there = hconn.execute("SELECT count(*) FROM learned_rules WHERE id=?", (del_id,)).fetchone()[0]
+        check('H1) MAILF-020 smaže jen zahozené pravidlo (aktivní zůstává)',
+              n == 1 and keep_there == 1 and del_there == 0,
+              f'deleted={n} keep={keep_there} discard_removed={1-del_there}')
+        check('H2) MAILF-020 prázdný vstup nic nesmaže (prevence hromadného smazání)',
+              _mr.delete_rules(hconn, []) == 0)
+        check('H3) MAILF-020 nelze smazat aktivní (ne-zahozené) pravidlo',
+              _mr.delete_rules(hconn, [keep_id]) == 0 and
+              hconn.execute("SELECT count(*) FROM learned_rules WHERE id=?", (keep_id,)).fetchone()[0] == 1)
+        # H4) idempotence: opakované smazání už smazaného = 0
+        check('H4) MAILF-020 opakované smazání = no-op', _mr.delete_rules(hconn, [del_id]) == 0)
+        hconn.close()
+
         # G) Bezpečnostní pojistky LLM cesty (bez sítě)
         inline_g = (
             "import sys, os; sys.path.insert(0,'%s');"

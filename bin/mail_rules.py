@@ -368,6 +368,31 @@ def create_rule(conn, fields):
     return cur.lastrowid
 
 
+def delete_rules(conn, rule_ids):
+    """MAILF-020 (t 2026-09-18): TRVALÉ smazání pravidel ze systému.
+
+    Povoleno JEN pro pravidla ve stavu 'discard' (nejdřív zahodit, pak smazat) —
+    aby se omylem nesmazalo aktivní pravidlo. Bezpečné pro dávkové volání
+    (vrací počet skutečně smazaných řádků).
+    """
+    ids = []
+    for x in (rule_ids or []):
+        try:
+            ids.append(int(x))
+        except (TypeError, ValueError):
+            continue
+    if not ids:
+        return 0
+    ph = ','.join('?' for _ in ids)
+    cur = conn.execute(
+        f"DELETE FROM learned_rules WHERE review_status='discard' AND id IN ({ph})", ids)
+    deleted = cur.rowcount or 0
+    conn.commit()
+    if deleted:
+        bump_model_version(conn)
+    return deleted
+
+
 def get_rule(conn, rule_id):
     """Vrať jedno pravidlo včetně labels (pro manuální run z webu, t 2026-08-23)."""
     row = conn.execute('SELECT * FROM learned_rules WHERE id=?', (rule_id,)).fetchone()
