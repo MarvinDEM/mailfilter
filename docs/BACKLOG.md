@@ -24,13 +24,17 @@ pravidel (https://mailfilter.bezouska.cz).
 
 - Triage nyní přečte **celý INBOX** (585 položek, paginace) — dřív viděla jen
   první okno 200.
-- Fronta se odmrazila: 623 no-op mailů se re-enqueue-uje **jednorázově** přes
-  `model_version` gate (žádný churn každých 15 min).
+- Fronta se odmrazila: 583 no-op mailů se re-enqueue-ovalo **jednorázově** přes
+  `model_version` gate (žádný churn každých 15 min). 34 zombie `manual_review`
+  záznamů → terminální `gone`.
 - Oba passy používají **jednu** klasifikaci (`mail_rules.py`), `confirmed_only=True`.
 - Druhý pass reálně volá LLM (deepseek-v4-flash přes lokální router), batch ≤20,
   cap volání/zpráv za běh, a z vysoko-konfidenčních rozhodnutí **navrhuje pravidla**
   (`pending`, čeká na odsouhlasení t ve webu).
-- Smoke test: `python3 bin/tests/mailfilter-smoke.py` → 13/13 OK.
+- **FÁZE 1 (bezpečný režim):** při `MAILFILTER_APPLY=0` se rozhodnutí s cílem uloží
+  jako `pending_apply` a **mailbox se nemění**; po přepnutí na `APPLY=1` se aplikují
+  z uloženého rozhodnutí bez dalšího LLM volání. Nevyřešené maily zůstávají ve frontě.
+- Smoke test: `python3 bin/tests/mailfilter-smoke.py` → 15/15 OK.
 
 **Přesuny/labely v mailboxu se rozjedou až po explicitním odsouhlasení t**
 (`MAILFILTER_APPLY=1` v cron wrapperu).
