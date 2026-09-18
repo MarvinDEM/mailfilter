@@ -640,7 +640,10 @@ def propose_rule(conn, sender, folder, proton_labels, source='llm-second-pass', 
          __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
          notes or 'LLM second pass — čeká na odsouhlasení'))
     conn.commit()
-    bump_model_version(conn)
+    # POZOR: pending pravidlo (active=0) klasifikaci NEMĚNÍ, protože oba passy
+    # používají confirmed_only=True → žádný bump model_version (jinak by každý
+    # návrh vyvolal zbytečný re-enqueue celé no-op fronty). Bump dělá až
+    # schválení pravidla (set_review).
     return cur.lastrowid
 
 

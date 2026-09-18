@@ -47,10 +47,14 @@ MAX_LLM_CALLS_PER_RUN = int(os.environ.get('MAILFILTER_MAX_LLM_CALLS', '2'))
 MAX_MESSAGES_PER_RUN = int(os.environ.get('MAILFILTER_MAX_MESSAGES', '20'))
 MAX_LLM_BATCH = int(os.environ.get('MAILFILTER_LLM_BATCH', '20'))
 
-LLM_MODEL = os.environ.get('MAILFILTER_LLM_MODEL', 'deepseek/deepseek-v4-flash')
+LLM_MODEL = os.environ.get('MAILFILTER_LLM_MODEL', 'deepseek/deepseek-chat')
 LITELLM_BASE = os.environ.get('MAILFILTER_LITELLM_BASE', 'http://127.0.0.1:4000/v1')
 LITELLM_ENV_PATH = ROOT / 'state' / 'litellm-router' / 'litellm-router.env'
-CONFIDENCE_THRESHOLD = 0.8
+# Minimální confidence LLM rozhodnutí, aby se použilo (t 2026-09-18): model
+# deepseek-chat se drží spíš konzervativně (0.5–0.95), takže 0.8 zahazovalo
+# prakticky vše. 0.6 je rozumný kompromis — pod ním jde mail do manual_review
+# cesty (ne "potichu do INBOX").
+CONFIDENCE_THRESHOLD = float(os.environ.get('MAILFILTER_LLM_MIN_CONF', '0.6'))
 
 ALLOWED_FOLDERS = [
     'Folders/00_marvin',
@@ -190,15 +194,21 @@ def llm_classify(batch):
         'model': LLM_MODEL,
         'messages': [{'role': 'user', 'content': prompt}],
         'temperature': 0,
-        'max_tokens': 1500,
+        'max_tokens': 3000,
     }).encode('utf-8')
     req = urllib.request.Request(
         f'{LITELLM_BASE}/chat/completions', data=payload,
         headers={'Content-Type': 'application/json',
                  'Authorization': f'Bearer {_litellm_key()}'})
-    with urllib.request.urlopen(req, timeout=60) as resp:
+    with urllib.request.urlopen(req, timeout=90) as resp:
         body = json.loads(resp.read().decode('utf-8'))
-    text = body['choices'][0]['message']['content'].strip()
+    choice = body['choices'][0]
+    text = (choice['message'].get('content') or '').strip()
+    if not text:
+        # Např. reasoning model, který spálil celý max_tokens na reasoning a
+        # content nechal prázdný — MUSÍ to být chyba, ne tiché prázdno.
+        raise RuntimeError(
+            f'empty LLM response (finish_reason={choice.get("finish_reason")}, model={LLM_MODEL})')
     if text.startswith('```'):
         text = text.strip('`')
         text = text.split('\n', 1)[1] if '\n' in text else text
@@ -301,10 +311,19 @@ def recipient_of(msg):
 
 def main():
     conn = db_connect()
-    pending = conn.execute(
-        "select id, subject, sender, message_id, attempts from queue "
-        "where status='needs_llm' order by updated_at asc, id asc limit ?",
-        (MAX_MESSAGES_PER_RUN,)).fetchall()
+    # MAILFILTER_SAMPLE_IDS=1,2,3 → řízený malý vzorek (t 2026-09-18): zpracuje
+    # POUZE uvedené zprávy, pro testovací běh s APPLY=1 na malém vzorku.
+    sample_ids = [s.strip() for s in os.environ.get('MAILFILTER_SAMPLE_IDS', '').split(',') if s.strip()]
+    if sample_ids:
+        ph = ','.join('?' for _ in sample_ids)
+        pending = conn.execute(
+            "select id, subject, sender, message_id, attempts from queue "
+            f"where status='needs_llm' and id in ({ph}) order by id asc", sample_ids).fetchall()
+    else:
+        pending = conn.execute(
+            "select id, subject, sender, message_id, attempts from queue "
+            "where status='needs_llm' order by updated_at asc, id asc limit ?",
+            (MAX_MESSAGES_PER_RUN,)).fetchall()
     manual_review_n = conn.execute(
         "select count(*) from queue where status='manual_review'").fetchone()[0]
     pending_apply_n = conn.execute(

@@ -62,3 +62,15 @@ Založen se známými položkami:
 - `rclone lsf protondrive:project-hub/mailfilter/` → 01-docs/, 02-backlog/, 03-status-reports/, 04-releases/, 05-deliverables/, 99-archive-links/
 - `rclone lsf proton-alzbeta:project-hub/mailfilter/02-backlog/` → BACKLOG.md
 - Sync skript EXIT 0, žádný email o selhání
+
+## Dodatek 2026-09-01 21:42 — samostatné GitHub repo
+
+- **Repo:** `MarvinDEM/mailfilter` (https://github.com/MarvinDEM/mailfilter), public
+- **Obsah:** mirror pracovního kódu — `bin/` (triage, LLM worker, second-pass, run-rule,
+  label helpery, cleanup), `scripts/rules-review/` (web), `docker/` (compose+Dockerfile),
+  `docs/` (Obsidian MD), `mail-sorting-rules.md`, README
+- **Pozn.:** kanonická pracovní kopie zůstává v `/root/.openclaw/workspace/bin/` a
+  `scripts/rules-review/` (host crony + Docker mount z nich běží); repo je verzovaný
+  mirror — změny se kopírují a pushují
+- **Denní push:** přidán do `bin/github-push-projects-cron.sh` (5:10 Prague)
+- **MEMORY.md:** mailfilter přidán do seznamu MarvinDEM repo

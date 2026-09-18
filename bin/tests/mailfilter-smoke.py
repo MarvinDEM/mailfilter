@@ -200,6 +200,26 @@ def main():
             ok = False
         check('E2) rule-proposals vrací strukturovaný návrh', ok, p.stdout[:200])
 
+        # G) Bezpečnostní pojistky LLM cesty (bez sítě)
+        inline_g = (
+            "import sys, os; sys.path.insert(0,'%s');"
+            "os.environ['MAILFILTER_LLM_ENABLED']='0';"
+            "import bezouska_llm_second_pass_worker as sp;"
+            "print('EMPTY' if sp.llm_classify([{'id':'x','subject':'s','from':'a@b.cz'}])=={} else 'CALLED')"
+            % BIN)
+        p = subprocess.run([sys.executable, '-c', inline_g], capture_output=True, text=True, env=env, timeout=60)
+        check('G1) MAILFILTER_LLM_ENABLED=0 → llm_classify nevolá síť (vrací {})',
+              p.stdout.strip().endswith('EMPTY'), p.stdout.strip()[-60:] + p.stderr[-120:])
+
+        inline_g2 = (
+            "import sys, os; sys.path.insert(0,'%s');"
+            "os.environ['MAILFILTER_LLM_MIN_CONF']='0.42';"
+            "import bezouska_llm_second_pass_worker as sp;"
+            "print('THR', sp.CONFIDENCE_THRESHOLD)" % BIN)
+        p = subprocess.run([sys.executable, '-c', inline_g2], capture_output=True, text=True, env=env, timeout=60)
+        check('G2) confidence práh je konfigurovatelný (MAILFILTER_LLM_MIN_CONF)',
+              'THR 0.42' in p.stdout, p.stdout.strip() + p.stderr[-120:])
+
         # C/F) stejná klasifikace obou passů = mail_rules (single source of truth)
         import inspect
         triage_mod = __import__('triage_bezouska_mail')
