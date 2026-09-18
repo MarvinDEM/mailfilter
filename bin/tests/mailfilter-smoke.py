@@ -159,7 +159,15 @@ def main():
         zombie = conn.execute("select status from queue where id='999999'").fetchone()[0]
         check('D2) MAILF-012 zombie manual_review → gone', zombie == 'gone', zombie)
         noop_status = conn.execute("select status from queue where id=?", (noop_id,)).fetchone()[0]
-        check('D3) no-op dořešen second passem (applied)', noop_status == 'applied', noop_status)
+        check('D3) APPLY=0: no-op se uloží jako pending_apply (mailbox se nemění)',
+              noop_status == 'pending_apply', noop_status)
+
+        # D4) APPLY=1 → pending_apply se promítne na 'applied' bez LLM
+        env_apply = dict(env)
+        env_apply['MAILFILTER_APPLY'] = '1'
+        p = run(env_apply, 'bezouska_llm_second_pass_worker.py')
+        noop_status = conn.execute("select status from queue where id=?", (noop_id,)).fetchone()[0]
+        check('D4) APPLY=1: pending_apply → applied', noop_status == 'applied', noop_status)
 
         # E) MAILF-015 generátor návrhů — dry-run, bez LLM
         p = run(env, 'mailfilter-rule-proposals.py', ['--dry-run', '--json', '--min', '1'])

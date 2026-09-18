@@ -36,6 +36,12 @@ LLM je navíc odděleně ovladatelný:
 - `MAILFILTER_LLM_ENABLED` (default `1`) — hard off switch.
 - `MAILFILTER_LLM_DRYRUN=1` — klasifikace se spočítá, ale LLM se nevolá.
 
+**Stav `pending_apply`:** s `APPLY=0` se rozhodnutí NESMÍ zapsat jako `applied`
+(mailbox se nemění) — jinak by `model_version` gate mail už nikdy nepřeřadil a
+při pozdějším `APPLY=1` by se rozhodnutí ztratilo. Proto se uloží jako
+`pending_apply`; po přepnutí na `APPLY=1` se aplikují z uloženého `decision_json`
+**bez dalšího LLM volání** (funkce `promoted`).
+
 ---
 
 ## 3. MAILF-013 + MAILF-014 — jeden zdroj pravdy pro klasifikaci
@@ -185,11 +191,12 @@ temp DB** a **falešném `himalaya` shimu** — žádný reálný IMAP, žádné
 | A | MAILF-011 — `list_env_all` přečte celý mailbox (200 mailů po 50) |
 | B1–B3 | MAILF-010 — no-op `applied` bez bumpu zůstává (no churn); po bumpu → `needs_llm` |
 | C1–C2 | MAILF-013 — triage i second pass delegují na `mail_rules.classify_message` |
-| D1–D3 | MAILF-012 — zombie `manual_review` → `gone`; no-op dořešen |
+| D1–D3 | MAILF-012 — zombie `manual_review` → `gone`; APPLY=0 uloží `pending_apply` |
+| D4 | APPLY=1 — `pending_apply` → `applied` bez LLM |
 | E1–E2 | MAILF-015 — rule-proposals běží a vrací strukturovaný návrh |
 | F1–F2 | MAILF-014 — oba passy `confirmed_only=True` |
 
-**Výsledek: 13/13 OK** (workspace `bin/` i mirror `mailfilter/bin/`).
+**Výsledek: 14/14 OK** (workspace `bin/` i mirror `mailfilter/bin/`).
 
 Spuštění: `python3 bin/tests/mailfilter-smoke.py`
 

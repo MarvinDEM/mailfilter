@@ -307,8 +307,10 @@ def main():
         (MAX_MESSAGES_PER_RUN,)).fetchall()
     manual_review_n = conn.execute(
         "select count(*) from queue where status='manual_review'").fetchone()[0]
+    pending_apply_n = conn.execute(
+        "select count(*) from queue where status='pending_apply'").fetchone()[0]
 
-    if not pending and manual_review_n == 0:
+    if not pending and manual_review_n == 0 and not (APPLY and pending_apply_n):
         summary = {
             'timestamp': now_iso(),
             'pending_before': 0, 'applied_count': 0, 'failed_count': 0,
@@ -397,7 +399,12 @@ def main():
             decisions[local_id] = dec
 
     # 3) aplikace rozhodnutí
+    # FÁZE 1: s APPLY=0 se NESMÍ zapsat 'applied' (mailbox se nemění) — jinak by
+    # model_version gate už mail nikdy nepřeřadil a při pozdějším APPLY=1 by se
+    # rozhodnutí ztratilo. Proto se uloží jako 'pending_apply'; po přepnutí na
+    # APPLY=1 se aplikují z uloženého decision_json BEZ dalšího LLM volání.
     applied, failed, skipped = [], [], []
+    pending_apply = []
     model_version = mail_rules.get_model_version(conn)
     for row in pending:
         local_id = str(row['id'])
@@ -405,21 +412,23 @@ def main():
             continue
         dec = decisions[local_id]
         labels = list(dict.fromkeys(dec.get('proton_labels', [])))
+        payload = {'id': local_id, 'message_id': row['message_id'],
+                   'folder': dec.get('folder') or 'INBOX', 'labels': labels,
+                   'reason': dec.get('reason'), 'confidence': dec.get('confidence', 0.7),
+                   'model_version': model_version}
+        if dec.get('folder') is None:
+            payload['note'] = 'no rule match — zůstává v INBOX'
         try:
+            if not APPLY:
+                conn.execute("update queue set status='pending_apply', decision_json=?, "
+                             "locked_at=NULL, last_error=NULL, updated_at=? where id=?",
+                             (json.dumps(payload, ensure_ascii=False), now_iso(), local_id))
+                pending_apply.append(payload)
+                continue
             for label in labels:
                 copy_to_label('INBOX', label, local_id)
-            if dec.get('folder') is None:
-                payload = {'id': local_id, 'message_id': row['message_id'], 'folder': 'INBOX',
-                           'labels': labels, 'reason': dec.get('reason'),
-                           'confidence': dec.get('confidence', 0.7),
-                           'model_version': model_version,
-                           'note': 'no rule match — zůstává v INBOX'}
-            else:
+            if dec.get('folder') is not None:
                 move('INBOX', dec['folder'], local_id)
-                payload = {'id': local_id, 'message_id': row['message_id'], 'folder': dec['folder'],
-                           'labels': labels, 'reason': dec.get('reason'),
-                           'confidence': dec.get('confidence', 0.7),
-                           'model_version': model_version}
             conn.execute("update queue set status='applied', decision_json=?, applied_at=?, "
                          "locked_at=NULL, last_error=NULL, updated_at=? where id=?",
                          (json.dumps(payload, ensure_ascii=False), now_iso(), now_iso(), local_id))
@@ -432,6 +441,26 @@ def main():
             failed.append({'id': local_id, 'message_id': row['message_id'], 'error': str(e), 'status': new_status})
 
     conn.commit()
+
+    # 3b) APPLY=1: dořešit dříve odložené 'pending_apply' BEZ LLM (uložené rozhodnutí).
+    promoted = []
+    if APPLY:
+        for row in conn.execute("select id, decision_json from queue "
+                                "where status='pending_apply' limit 500").fetchall():
+            local_id = str(row['id'])
+            try:
+                dec = json.loads(row['decision_json'] or '{}')
+                for label in dec.get('labels', []):
+                    copy_to_label('INBOX', label, local_id)
+                if dec.get('folder') and dec['folder'] != 'INBOX':
+                    move('INBOX', dec['folder'], local_id)
+                conn.execute("update queue set status='applied', applied_at=?, updated_at=? "
+                             "where id=?", (now_iso(), now_iso(), local_id))
+                promoted.append(local_id)
+            except Exception as e:
+                conn.execute("update queue set status='manual_review', last_error=?, updated_at=? "
+                             "where id=?", (str(e), now_iso(), local_id))
+        conn.commit()
 
     # MAILF-012: rekonciliace zombie 'manual_review' záznamů (bounded).
     # Záznam, jehož zpráva už v INBOX není, se označí terminálně 'gone';
@@ -456,6 +485,8 @@ def main():
         'applied_count': len(applied),
         'failed_count': len(failed),
         'skipped_count': len(skipped),
+        'pending_apply_count': len(pending_apply),
+        'promoted_count': len(promoted),
         'llm_calls': llm_calls,
         'llm_enabled': LLM_ENABLED,
         'llm_dryrun': LLM_DRYRUN,

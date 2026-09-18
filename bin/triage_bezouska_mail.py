@@ -161,7 +161,7 @@ def db_connect():
 
 def queue_counts(conn):
     counts={}
-    for status in ('needs_llm','manual_review','applied','llm_in_progress'):
+    for status in ('needs_llm','manual_review','applied','llm_in_progress','pending_apply','gone'):
         counts[status]=conn.execute('SELECT COUNT(*) FROM queue WHERE status=?',(status,)).fetchone()[0]
     return counts
 
@@ -204,16 +204,20 @@ def enqueue_candidate(conn, msg):
     if row:
         if row['status'] in {'needs_llm','llm_in_progress','manual_review'}:
             return False
-        if row['status']=='applied':
+        if row['status'] in {'applied','pending_apply'}:
             try:
                 dec=json.loads(row['decision_json'] or '{}')
             except Exception:
                 dec={}
-            if dec.get('folder') != 'INBOX':
+            if row['status']=='pending_apply':
+                # rozhodnutí čeká na APPLY=1 — přehodnotit jen při změně modelu
+                if dec.get('model_version') == mail_rules.get_model_version(conn):
+                    return False
+            elif dec.get('folder') != 'INBOX':
                 # skutečně zařazený mail → nechat být
                 return False
             # no-op (zůstal v INBOX) → přehodnotit jen při změně klasifikačního modelu
-            if dec.get('model_version') == mail_rules.get_model_version(conn):
+            elif dec.get('model_version') == mail_rules.get_model_version(conn):
                 return False
     ts=now_iso()
     message_id = msg.get('message_id') or msg.get('messageId') or None
